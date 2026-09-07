@@ -34,11 +34,10 @@ export default async function AboutPage() {
             sensibility meets the discipline of modern luxury tailoring: restrained palettes, honest
             fabric, and finishing you feel rather than see.
           </p>
-          <h2>Small runs, on purpose</h2>
+          <h2>Crafted in our atelier</h2>
           <p>
-            A style is cut in a run of twenty, sometimes thirty. When it is finished, it is finished.
-            This keeps our atelier honest and our wardrobe personal — you are unlikely to meet
-            yourself at a wedding.
+            Every style is cut and finished by the tailors we work with every day. This keeps our
+            craft honest and our wardrobe personal — you are unlikely to meet yourself at a wedding.
           </p>
           <h2>People before pieces</h2>
           <p>

@@ -1,0 +1,434 @@
+@import "tailwindcss";
+
+/* ================================================================
+   ARCHITECTURE & INTERIOR DESIGN — Premium Design System
+   Inspired by: Insightlancer Architecture/Interior Figma Template
+   ================================================================ */
+
+@theme {
+  /* --- Core Palette --- */
+  --color-arch-primary: #1a1a1a;
+  --color-arch-primary-light: #2a2a2a;
+  --color-arch-accent: #c9a96e;
+  --color-arch-accent-light: #dfc89a;
+  --color-arch-surface: #ffffff;
+  --color-arch-surface-alt: #f8f7f4;
+  --color-arch-muted: #6b6b6b;
+  --color-arch-border: #e5e3de;
+  --color-arch-dark: #111111;
+  --color-arch-cream: #faf9f6;
+
+  /* --- Fonts --- */
+  --font-arch-display: var(--font-playfair), Georgia, 'Times New Roman', serif;
+  --font-arch-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-arch-accent: var(--font-cormorant), Georgia, serif;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-arch-cream);
+  color: var(--color-arch-primary);
+  font-family: var(--font-arch-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ================================================================
+   Typography System
+   ================================================================ */
+
+.t-display {
+  font-family: var(--font-arch-display);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.t-accent {
+  font-family: var(--font-arch-accent);
+  font-weight: 400;
+  font-style: italic;
+}
+
+.t-eyebrow {
+  font-family: var(--font-arch-body);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-arch-accent);
+}
+
+.t-body {
+  font-family: var(--font-arch-body);
+  font-weight: 400;
+  line-height: 1.7;
+  color: var(--color-arch-muted);
+}
+
+/* ================================================================
+   Layout
+   ================================================================ */
+
+.arch-wrap {
+  width: 100%;
+  max-width: 1320px;
+  margin-inline: auto;
+  padding-inline: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .arch-wrap {
+    padding-inline: 3rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .arch-wrap {
+    padding-inline: 4rem;
+  }
+}
+
+/* ================================================================
+   Section System
+   ================================================================ */
+
+.arch-section {
+  padding-block: 5rem;
+}
+
+@media (min-width: 768px) {
+  .arch-section {
+    padding-block: 7rem;
+  }
+}
+
+.arch-section-dark {
+  background-color: var(--color-arch-primary);
+  color: #fff;
+}
+
+.arch-section-dark .t-eyebrow {
+  color: var(--color-arch-accent);
+}
+
+.arch-section-dark .t-body {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ================================================================
+   Buttons
+   ================================================================ */
+
+.arch-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem 2.25rem;
+  font-family: var(--font-arch-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.arch-btn-primary {
+  background: var(--color-arch-accent);
+  color: #fff;
+  border-color: var(--color-arch-accent);
+}
+
+.arch-btn-primary:hover {
+  background: #b8954f;
+  border-color: #b8954f;
+}
+
+.arch-btn-outline {
+  background: transparent;
+  color: var(--color-arch-primary);
+  border-color: var(--color-arch-primary);
+}
+
+.arch-btn-outline:hover {
+  background: var(--color-arch-primary);
+  color: #fff;
+}
+
+.arch-btn-white {
+  background: #fff;
+  color: var(--color-arch-primary);
+  border-color: #fff;
+}
+
+.arch-btn-white:hover {
+  background: transparent;
+  color: #fff;
+}
+
+.arch-btn-ghost {
+  background: transparent;
+  color: var(--color-arch-accent);
+  border-color: transparent;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.arch-btn-ghost::after {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 1px;
+  background: var(--color-arch-accent);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.arch-btn-ghost:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* ================================================================
+   Cards
+   ================================================================ */
+
+.arch-card {
+  background: var(--color-arch-surface);
+  border: 1px solid var(--color-arch-border);
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.arch-card:hover {
+  border-color: var(--color-arch-accent);
+  box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.1);
+}
+
+/* ================================================================
+   Image Containers
+   ================================================================ */
+
+.arch-img-wrap {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-arch-surface-alt);
+}
+
+.arch-img-wrap img {
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.arch-img-wrap:hover img {
+  transform: scale(1.05);
+}
+
+.arch-img-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+/* ================================================================
+   Divider
+   ================================================================ */
+
+.arch-divider {
+  width: 60px;
+  height: 2px;
+  background: var(--color-arch-accent);
+}
+
+.arch-divider-wide {
+  width: 100%;
+  height: 1px;
+  background: var(--color-arch-border);
+}
+
+/* ================================================================
+   Number Counter (for stats)
+   ================================================================ */
+
+.arch-stat-number {
+  font-family: var(--font-arch-display);
+  font-size: 3rem;
+  font-weight: 400;
+  line-height: 1;
+  color: var(--color-arch-accent);
+}
+
+@media (min-width: 768px) {
+  .arch-stat-number {
+    font-size: 4rem;
+  }
+}
+
+/* ================================================================
+   Grid Patterns
+   ================================================================ */
+
+.arch-grid-2 {
+  display: grid;
+  gap: 2rem;
+}
+
+@media (min-width: 768px) {
+  .arch-grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.arch-grid-3 {
+  display: grid;
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .arch-grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .arch-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.arch-grid-4 {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+@media (min-width: 768px) {
+  .arch-grid-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* ================================================================
+   Motion
+   ================================================================ */
+
+@keyframes arch-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes arch-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes arch-slide-right {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.arch-animate-up {
+  animation: arch-fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.arch-animate-in {
+  animation: arch-fade-in 0.5s ease both;
+}
+
+.arch-animate-right {
+  animation: arch-slide-right 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.arch-delay-1 { animation-delay: 0.1s; }
+.arch-delay-2 { animation-delay: 0.2s; }
+.arch-delay-3 { animation-delay: 0.3s; }
+.arch-delay-4 { animation-delay: 0.4s; }
+.arch-delay-5 { animation-delay: 0.5s; }
+
+/* Stagger children */
+.arch-stagger > * {
+  animation: arch-fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.arch-stagger > *:nth-child(1) { animation-delay: 0s; }
+.arch-stagger > *:nth-child(2) { animation-delay: 0.08s; }
+.arch-stagger > *:nth-child(3) { animation-delay: 0.16s; }
+.arch-stagger > *:nth-child(4) { animation-delay: 0.24s; }
+.arch-stagger > *:nth-child(5) { animation-delay: 0.32s; }
+.arch-stagger > *:nth-child(6) { animation-delay: 0.4s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .arch-animate-up,
+  .arch-animate-in,
+  .arch-animate-right,
+  .arch-stagger > * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+  .arch-img-wrap img,
+  .arch-card {
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ================================================================
+   Header
+   ================================================================ */
+
+.arch-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  transition: all 0.3s ease;
+}
+
+.arch-header-scrolled {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-arch-border);
+}
+
+/* ================================================================
+   Scrollbar
+   ================================================================ */
+
+.arch-hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.arch-hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ================================================================
+   Print
+   ================================================================ */
+
+@media print {
+  .arch-header { display: none !important; }
+}

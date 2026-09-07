@@ -1,78 +1,82 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Admin') · OSSZ Collections</title>
+    <title>@yield('title', 'Backoffice') · OSSZ Collections</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/poppins?family=300;400;500&display=swap" rel="stylesheet">
-    @livewireStyles
-    <style>
-        :root {
-            --ink: #1b1917; --ink-soft: #4a453f; --muted: #8a8279;
-            --canvas: #f7f7f8; --paper: #fff; --line: #e6e7ea;
-            --accent: #9b5f2f; --accent-soft: #f1f2f4; --clay: #2f3630;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Poppins', sans-serif; background: var(--canvas); color: var(--ink); }
-        .layout { display: flex; min-height: 100vh; }
-        .sidebar { width: 240px; background: var(--ink); color: #fff; padding: 1.5rem; flex-shrink: 0; }
-        .sidebar a { color: rgba(255,255,255,.7); text-decoration: none; display: block; padding: .5rem .75rem; border-radius: 4px; font-size: .82rem; letter-spacing: .06em; text-transform: uppercase; transition: all .15s; }
-        .sidebar a:hover, .sidebar a.active { background: rgba(255,255,255,.1); color: #fff; }
-        .sidebar .brand { font-size: 1.1rem; font-weight: 300; letter-spacing: -.02em; margin-bottom: 2rem; }
-        .main { flex: 1; padding: 2rem; }
-        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-        .topbar h1 { font-size: 1.6rem; font-weight: 300; letter-spacing: -.02em; }
-        .card { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 1.25rem; }
-        .btn { display: inline-flex; align-items: center; gap: .4rem; border: none; border-radius: 4px; padding: .5rem 1rem; font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; font-family: inherit; }
-        .btn-primary { background: var(--ink); color: #fff; }
-        .btn-primary:hover { background: var(--accent); }
-        .btn-secondary { background: transparent; color: var(--ink); border: 1px solid var(--ink); }
-        .field { width: 100%; border: 1px solid var(--line); border-radius: 4px; padding: .6rem .75rem; font-size: .88rem; font-family: inherit; }
-        .field:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
-        .text-muted { color: var(--muted); font-size: .78rem; }
-        .eyebrow { font-size: .68rem; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
-        .chip { display: inline-block; border: 1px solid var(--line); border-radius: 999px; padding: .3rem .7rem; font-size: .72rem; cursor: pointer; }
-        .chip.active { background: var(--ink); color: #fff; border-color: var(--ink); }
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: .75rem .5rem; border-bottom: 1px solid var(--line); }
-        td { padding: .75rem .5rem; border-bottom: 1px solid rgba(230,231,234,.6); font-size: .85rem; }
-        .pill { display: inline-block; padding: .2rem .6rem; border-radius: 999px; font-size: .68rem; font-weight: 500; }
-        .pill-green { background: #d4edda; color: #155724; }
-        .pill-yellow { background: #fff3cd; color: #856404; }
-        .pill-blue { background: #d1ecf1; color: #0c5460; }
-        .pill-gray { background: #e9ecef; color: #495057; }
-        .pill-red { background: #f8d7da; color: #721c24; }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    @stack('styles')
 </head>
 <body>
-    <div class="layout">
-        <aside class="sidebar">
-            <div class="brand">OSSZ Collections</div>
-            <nav>
-                <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">Dashboard</a>
-                <a href="{{ route('admin.orders.index') }}" class="{{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">Orders</a>
-                <a href="{{ route('admin.products.index') }}" class="{{ request()->routeIs('admin.products.*') ? 'active' : '' }}">Products</a>
-                <a href="{{ route('admin.appointments.index') }}" class="{{ request()->routeIs('admin.appointments.*') ? 'active' : '' }}">Appointments</a>
-                <a href="{{ route('admin.chatbot') }}" class="{{ request()->routeIs('admin.chatbot') ? 'active' : '' }}">AI Concierge</a>
-                <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Sign out</a>
-            </nav>
-            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">@csrf</form>
-        </aside>
-        <div class="main">
-            <div class="topbar">
-                <h1>@yield('title', 'Dashboard')</h1>
-                <span class="text-muted">{{ auth()->user()->name ?? auth()->user()->email ?? 'Admin' }}</span>
-            </div>
-            @if(session('success'))
-                <div class="card" style="border-left: 3px solid #28a745; margin-bottom: 1rem;">{{ session('success') }}</div>
+@php
+    $user = $osszUser ?? \App\Models\User::find(session('user_id'));
+    $canFulfil = \App\Support\Auth::canFulfilOrders($user->role ?? 'customer');
+    $canManage = \App\Support\Auth::canManageCatalogue($user->role ?? 'customer');
+    $isAdmin = \App\Support\Auth::isAdmin($user->role ?? 'customer');
+    $current = request()->route() ? request()->route()->getName() : '';
+@endphp
+
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <div class="brand">OSSZ Collections</div>
+        <nav>
+            <a href="{{ route('admin.dashboard') }}" class="{{ str_starts_with($current, 'admin.dashboard') ? 'active' : '' }}">{{ is_fr() ? 'Tableau de bord' : 'Dashboard' }}</a>
+            @if ($canFulfil)
+                <a href="{{ route('admin.orders.index') }}" class="{{ str_starts_with($current, 'admin.orders') ? 'active' : '' }}">{{ is_fr() ? 'Commandes' : 'Orders' }}</a>
+                <a href="{{ route('admin.appointments') }}" class="{{ $current === 'admin.appointments' ? 'active' : '' }}">{{ t('nav.appointments') }}</a>
+                <a href="{{ route('admin.notifications') }}" class="{{ $current === 'admin.notifications' ? 'active' : '' }}">{{ is_fr() ? 'Notifications' : 'Notifications' }}</a>
+                <a href="{{ route('admin.contact') }}" class="{{ $current === 'admin.contact' ? 'active' : '' }}">{{ is_fr() ? 'Messages' : 'Messages' }}</a>
+                <a href="{{ route('admin.ai-gaps') }}" class="{{ $current === 'admin.ai-gaps' ? 'active' : '' }}">AI gaps</a>
             @endif
-            @if(session('error'))
-                <div class="card" style="border-left: 3px solid #dc3545; margin-bottom: 1rem;">{{ session('error') }}</div>
+            @if ($canManage)
+                <a href="{{ route('admin.products.index') }}" class="{{ str_starts_with($current, 'admin.products') ? 'active' : '' }}">{{ is_fr() ? 'Catalogue' : 'Products' }}</a>
+                <a href="{{ route('admin.collections.index') }}" class="{{ $current === 'admin.collections.index' ? 'active' : '' }}">{{ t('nav.collections') }}</a>
+                <a href="{{ route('admin.inventory') }}" class="{{ $current === 'admin.inventory' ? 'active' : '' }}">{{ is_fr() ? 'Stock' : 'Inventory' }}</a>
+                <a href="{{ route('admin.media') }}" class="{{ $current === 'admin.media' ? 'active' : '' }}">{{ is_fr() ? 'Médias' : 'Media' }}</a>
             @endif
-            @yield('content')
+            @if ($isAdmin)
+                <a href="{{ route('admin.homepage') }}" class="{{ $current === 'admin.homepage' ? 'active' : '' }}">{{ is_fr() ? 'Accueil' : 'Homepage' }}</a>
+                <a href="{{ route('admin.journal') }}" class="{{ $current === 'admin.journal' ? 'active' : '' }}">{{ t('nav.journal') }}</a>
+                <a href="{{ route('admin.lookbook') }}" class="{{ $current === 'admin.lookbook' ? 'active' : '' }}">{{ t('nav.lookbook') }}</a>
+                <a href="{{ route('admin.faqs') }}" class="{{ $current === 'admin.faqs' ? 'active' : '' }}">FAQ</a>
+                <a href="{{ route('admin.coupons') }}" class="{{ $current === 'admin.coupons' ? 'active' : '' }}">{{ is_fr() ? 'Codes promo' : 'Coupons' }}</a>
+                <a href="{{ route('admin.customers') }}" class="{{ $current === 'admin.customers' ? 'active' : '' }}">{{ is_fr() ? 'Clients' : 'Customers' }}</a>
+                <a href="{{ route('admin.staff') }}" class="{{ $current === 'admin.staff' ? 'active' : '' }}">{{ is_fr() ? 'Équipe' : 'Staff' }}</a>
+                <a href="{{ route('admin.settings') }}" class="{{ $current === 'admin.settings' ? 'active' : '' }}">{{ is_fr() ? 'Réglages' : 'Settings' }}</a>
+                <a href="{{ route('admin.export', ['type' => 'orders']) }}">{{ is_fr() ? 'Exporter (CSV)' : 'Export (CSV)' }}</a>
+            @endif
+        </nav>
+
+        <div style="margin-top:2rem;font-size:.72rem;color:rgba(255,255,255,.55)">
+            {{ $user->email ?? '' }}<br>{{ $user->role ?? '' }}
         </div>
+        <form method="POST" action="{{ route('logout') }}" style="margin-top:.8rem">
+            @csrf
+            <button class="btn btn-sm" style="background:rgba(255,255,255,.12);color:#fff" type="submit">{{ is_fr() ? 'Se déconnecter' : 'Sign out' }}</button>
+        </form>
+        <a class="btn btn-sm" style="margin-top:1.4rem;background:rgba(255,255,255,.12);color:#fff" href="{{ route('home') }}">← {{ is_fr() ? 'Boutique' : 'Storefront' }}</a>
+    </aside>
+
+    <div class="admin-main">
+        <div class="admin-topbar">
+            <h1>@yield('title', 'Dashboard')</h1>
+        </div>
+
+        @if (session('success'))
+            <div class="flash flash-success" style="margin:0 0 1rem">{{ session('success') }}</div>
+        @endif
+        @if (session('error'))
+            <div class="flash flash-error" style="margin:0 0 1rem">{{ session('error') }}</div>
+        @endif
+        @if ($errors->any())
+            <div class="flash flash-error" style="margin:0 0 1rem">{{ implode(' · ', $errors->all()) }}</div>
+        @endif
+
+        @yield('content')
     </div>
-    @livewireScripts
+</div>
+@stack('scripts')
 </body>
 </html>

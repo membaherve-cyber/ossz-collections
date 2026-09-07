@@ -184,6 +184,7 @@ export const orders = pgTable("orders", {
   deliveryMethod: text("delivery_method").notNull().default("douala_local"),
   deliveryZone: text("delivery_zone").notNull().default(""),
   shippingSnapshot: jsonb("shipping_snapshot"),
+  paymentProofUrl: text("payment_proof_url"),
   notes: text("notes").notNull().default(""),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
@@ -305,6 +306,11 @@ export const lookbookItems = pgTable("lookbook_items", {
   caption: text("caption").notNull().default(""),
   captionFr: text("caption_fr").notNull().default(""),
   imageUrl: text("image_url").notNull(),
+  /** image | video — videos also store a poster frame for fast first paint. */
+  mediaType: text("media_type").notNull().default("image"),
+  videoUrl: text("video_url"),
+  posterUrl: text("poster_url"),
+  durationSeconds: integer("duration_seconds"),
   productSlug: text("product_slug").notNull().default(""),
   sortOrder: integer("sort_order").notNull().default(0),
 });
@@ -371,6 +377,24 @@ export const contactMessages = pgTable("contact_messages", {
   handled: boolean("handled").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+/** Questions the concierge could not confidently answer, so staff can
+ *  review and add approved answers. */
+export const aiGaps = pgTable("ai_gaps", {
+  id: serial("id").primaryKey(),
+  sessionId: text("session_id").notNull().default(""),
+  question: text("question").notNull(),
+  locale: text("locale").notNull().default("en"),
+  detectedIntent: text("detected_intent").notNull().default(""),
+  searchPerformed: text("search_performed").notNull().default(""),
+  searchResult: text("search_result").notNull().default(""),
+  reason: text("reason").notNull().default(""),
+  resolvedAnswer: text("resolved_answer").notNull().default(""),
+  resolvedBy: integer("resolved_by").references(() => users.id, { onDelete: "set null" }),
+  status: text("status").notNull().default("open"), // open | resolved
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [index("ai_gaps_session_idx").on(table.sessionId)]);
 
 /**
  * Outbound customer notifications (§12.2) — every order status change is

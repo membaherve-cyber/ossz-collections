@@ -261,17 +261,22 @@ export async function deleteHomeBlockAction(formData: FormData) {
 export async function saveLookAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
   await requireRole("catalogue");
   const imageUrl = String(formData.get("imageUrl") ?? "").trim();
-  if (!imageUrl) return { ok: false, message: "A photo is required." };
+  if (!imageUrl) return { ok: false, message: "A photo or video is required." };
+  const mediaType = String(formData.get("mediaType") ?? "image") === "video" ? "video" : "image";
   await db.insert(lookbookItems).values({
     title: String(formData.get("title") ?? ""),
     caption: String(formData.get("caption") ?? ""),
     imageUrl,
+    mediaType,
+    videoUrl: mediaType === "video" ? String(formData.get("videoUrl") ?? imageUrl) : null,
+    posterUrl: mediaType === "video" ? String(formData.get("posterUrl") ?? "") || null : null,
+    durationSeconds: mediaType === "video" ? Number(formData.get("durationSeconds")) || null : null,
     productSlug: String(formData.get("productSlug") ?? ""),
     sortOrder: Number(formData.get("sortOrder") ?? 0),
   });
   revalidatePath("/admin/lookbook");
   revalidatePath("/lookbook");
-  return { ok: true, message: "Look added to the lookbook." };
+  return { ok: true, message: mediaType === "video" ? "Video added to the lookbook." : "Look added to the lookbook." };
 }
 
 export async function deleteLookAction(formData: FormData) {

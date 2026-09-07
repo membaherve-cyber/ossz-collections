@@ -1,241 +1,81 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Track Order - OSSZ Collections</title>
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/cormorant+garamond|300;400;500;600" rel="stylesheet">
-    <link href="https://fonts.bunny.net/poppins|300;400;500;600" rel="stylesheet">
-    <style>
-        :root { --ink: #1a1a1a; --cream: #faf9f6; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Poppins', sans-serif; color: var(--ink); background: var(--cream); }
-        
-        .nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.5rem 3rem;
-            border-bottom: 1px solid #e5e5e5;
-        }
-        .nav a {
-            color: var(--ink);
-            text-decoration: none;
-            text-transform: uppercase;
-            font-size: 0.8rem;
-            letter-spacing: 0.1em;
-        }
+@extends('layouts.app')
 
-        .track-container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 4rem 2rem;
-        }
-        .track-header {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-        .track-header h1 {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 2.5rem;
-            font-weight: 300;
-            margin-bottom: 0.5rem;
-        }
-        .track-header p {
-            font-size: 0.9rem;
-            color: #666;
-        }
+@section('title', $order ? "Order {$order->order_number}" : t('footer.trackLink'))
 
-        .track-form {
-            background: white;
-            padding: 2rem;
-            border-radius: 4px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-        }
-        .track-form label {
-            display: block;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: #666;
-            margin-bottom: 0.5rem;
-        }
-        .track-form input {
-            width: 100%;
-            padding: 1rem;
-            border: 1px solid #e5e5e5;
-            border-radius: 4px;
-            font-size: 1rem;
-            margin-bottom: 1.5rem;
-        }
-        .track-form input:focus {
-            outline: none;
-            border-color: #b8860b;
-        }
-        .track-form button {
-            width: 100%;
-            padding: 1rem;
-            background: var(--ink);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .track-form button:hover {
-            background: #333;
-        }
+@section('content')
+    <section class="wrap" style="padding:3rem 0;max-width:760px">
+        <h1 class="display" style="font-size:1.6rem">
+            {{ $order ? (is_fr() ? 'Commande' : 'Order').' '.$order->order_number : t('footer.trackLink') }}
+        </h1>
 
-        .track-result {
-            margin-top: 2rem;
-            padding: 2rem;
-            background: white;
-            border-radius: 4px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-            display: none;
-        }
-        .track-result h3 {
-            font-size: 1.2rem;
-            margin-bottom: 1rem;
-        }
-        .track-result .status {
-            display: inline-block;
-            padding: 0.5rem 1rem;
-            border-radius: 999px;
-            font-size: 0.8rem;
-            font-weight: 500;
-            margin-bottom: 1rem;
-        }
-        .track-result .status.placed { background: #e3f2fd; color: #1565c0; }
-        .track-result .status.processing { background: #fff3e0; color: #e65100; }
-        .track-result .status.ready_for_pickup { background: #e8f5e9; color: #2e7d32; }
-        .track-result .status.delivered { background: #e8f5e9; color: #1b5e20; }
-
-        .track-result .timeline {
-            margin-top: 1.5rem;
-            border-left: 2px solid #e5e5e5;
-            padding-left: 1.5rem;
-        }
-        .track-result .timeline .step {
-            position: relative;
-            margin-bottom: 1rem;
-            padding-bottom: 1rem;
-        }
-        .track-result .timeline .step::before {
-            content: '';
-            position: absolute;
-            left: -1.75rem;
-            top: 0.25rem;
-            width: 10px;
-            height: 10px;
-            background: #e5e5e5;
-            border-radius: 50%;
-        }
-        .track-result .timeline .step.active::before {
-            background: var(--ink);
-        }
-        .track-result .timeline .step h4 {
-            font-size: 0.85rem;
-            margin-bottom: 0.25rem;
-        }
-        .track-result .timeline .step p {
-            font-size: 0.75rem;
-            color: #666;
-        }
-
-        .footer {
-            background: var(--ink);
-            color: white;
-            padding: 3rem;
-            text-align: center;
-            margin-top: 4rem;
-        }
-        .footer p { font-size: 0.75rem; opacity: 0.6; }
-    </style>
-</head>
-<body>
-    <nav class="nav">
-        <a href="/shop">Shop</a>
-        <a href="/collections">Collections</a>
-        <a href="/lookbook">Lookbook</a>
-        <a href="/" style="font-family: 'Cormorant Garamond', serif; font-size: 1.5rem;">OSSZ</a>
-        <a href="/journal">Journal</a>
-        <a href="/appointments">Appointments</a>
-        <a href="/about">About</a>
-    </nav>
-
-    <div class="track-container">
-        <div class="track-header">
-            <h1>Track Your Order</h1>
-            <p>Enter your order number to see the current status</p>
-        </div>
-
-        <div class="track-form">
-            <label for="orderNumber">Order Number</label>
-            <input type="text" 
-                id="orderNumber" 
-                placeholder="e.g., OSZ-001"
-                value="{{ $number ?? '' }}">
-            <button type="button" onclick="trackOrder()">Track Order</button>
-        </div>
-
-        <div class="track-result" id="trackResult">
-            <h3>Order {{ $number ?? '' }}</h3>
-            <div class="status" id="orderStatus">Placed</div>
-            
-            <div class="timeline">
-                <div class="step active">
-                    <h4>Order Placed</h4>
-                    <p>Your order has been received</p>
-                </div>
-                <div class="step active">
-                    <h4>Processing</h4>
-                    <p>We're preparing your order</p>
-                </div>
-                <div class="step">
-                    <h4>Ready for Pickup</h4>
-                    <p>Your order is ready at our boutique</p>
-                </div>
-                <div class="step">
-                    <h4>Delivered</h4>
-                    <p>Thank you for shopping with OSSZ!</p>
-                </div>
+        @if (! $order)
+            <div class="card" style="padding:2rem;margin-top:1.5rem">
+                <p style="font-size:.9rem;color:var(--ink-soft)">
+                    {{ is_fr() ? 'Nous n\'avons pas trouvé cette commande. Vérifiez le numéro et réessayez.' : 'We could not find that order. Check the number and try again.' }}
+                </p>
+                <a class="btn btn-secondary btn-sm" style="margin-top:1rem" href="{{ route('order.lookup.form') }}">← {{ t('footer.trackLink') }}</a>
             </div>
-        </div>
-    </div>
+        @elseif (! $matched)
+            <div class="card" style="padding:2rem;margin-top:1.5rem">
+                <p style="font-size:.9rem;color:var(--ink-soft)">
+                    {{ is_fr()
+                        ? 'Pour des raisons de confidentialité, confirmez l\'email ou le téléphone utilisé lors de la commande.'
+                        : 'For privacy, please confirm the email or phone used when ordering.' }}
+                </p>
+                <form method="GET" action="{{ url('order/'.$order->order_number) }}" style="display:flex;gap:.6rem;margin-top:1rem;max-width:420px">
+                    <input class="field" name="contact" required placeholder="email / {{ t('contact.wa') }}" value="{{ $contact }}">
+                    <button class="btn btn-primary btn-sm" type="submit">{{ is_fr() ? 'Confirmer' : 'Confirm' }}</button>
+                </form>
+            </div>
+        @else
+            <div class="card" style="padding:1.8rem;margin-top:1.5rem">
+                <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:.6rem">
+                    <div>
+                        <p class="eyebrow">{{ status_label($order->status) }}</p>
+                        <p style="font-size:.9rem;margin-top:.3rem">{{ $order->customer_name }}</p>
+                        <p style="font-size:.75rem;color:var(--muted)">{{ format_date_time($order->created_at) }}</p>
+                    </div>
+                    <div style="text-align:right">
+                        <p class="eyebrow">{{ t('cart.total') }}</p>
+                        <p style="font-size:1.2rem">{{ format_xaf($order->total) }}</p>
+                        <p style="font-size:.72rem;color:var(--muted)">{{ payment_label($order->payment_method) }} · {{ status_label($order->payment_status) }}</p>
+                    </div>
+                </div>
 
-    <footer class="footer">
-        <p>© {{ date('Y') }} OSSZ Collections. All rights reserved.</p>
-    </footer>
+                {{-- Status timeline --}}
+                <div style="display:flex;gap:.3rem;margin-top:1.8rem">
+                    @php
+                        $steps = ['placed', 'processing', 'ready', 'out_for_delivery', 'delivered'];
+                        $idx = array_search($order->status, $steps, true);
+                        $cancelled = in_array($order->status, ['cancelled', 'returned']);
+                    @endphp
+                    @foreach ($steps as $i => $step)
+                        <div style="flex:1;text-align:center">
+                            <div style="height:4px;border-radius:2px;background:{{ (! $cancelled && $i <= $idx) ? 'var(--accent)' : 'var(--line)' }}"></div>
+                            <p style="font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-top:.35rem">{{ status_label($step) }}</p>
+                        </div>
+                    @endforeach
+                </div>
+                @if ($cancelled)
+                    <p class="pill pill-red" style="margin-top:1rem">{{ status_label($order->status) }}</p>
+                @endif
+            </div>
 
-    <script>
-        function trackOrder() {
-            const orderNumber = document.getElementById('orderNumber').value.trim();
-            if (!orderNumber) {
-                alert('Please enter your order number');
-                return;
-            }
-            
-            // Fetch order status from API
-            fetch(`/api/orders/${orderNumber}/status`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status) {
-                        document.getElementById('trackResult').style.display = 'block';
-                        document.getElementById('orderStatus').textContent = data.status;
-                        document.getElementById('orderStatus').className = 'status ' + data.status;
-                    } else {
-                        alert('Order not found. Please check your order number.');
-                    }
-                })
-                .catch(err => {
-                    alert('Error tracking order. Please try again.');
-                });
-        }
-    </script>
-</body>
-</html>
+            <div class="card" style="padding:1.5rem;margin-top:1rem">
+                <p class="eyebrow">{{ is_fr() ? 'Articles' : 'Items' }}</p>
+                @foreach ($items as $item)
+                    <div style="display:flex;justify-content:space-between;gap:1rem;padding:.7rem 0;border-bottom:1px solid var(--line);font-size:.88rem">
+                        <span>{{ $item->product_name }} <span style="color:var(--muted);font-size:.75rem">{{ $item->variant_label }} × {{ $item->quantity }}</span></span>
+                        <span>{{ format_xaf($item->unit_price * $item->quantity) }}</span>
+                    </div>
+                @endforeach
+                <div class="summary-row" style="margin-top:.8rem"><span>{{ t('cart.subtotal') }}</span><span>{{ format_xaf($order->subtotal) }}</span></div>
+                @if ($order->discount > 0)
+                    <div class="summary-row" style="color:#3f9d63"><span>{{ t('cart.discount') }}</span><span>−{{ format_xaf($order->discount) }}</span></div>
+                @endif
+                <div class="summary-row"><span>{{ t('cart.deliveryEstimate') }} — {{ delivery_label($order->delivery_method) }}</span><span>{{ $order->delivery_fee == 0 ? t('cart.complimentary') : format_xaf($order->delivery_fee) }}</span></div>
+                <div class="summary-row total"><span>{{ t('cart.total') }}</span><span>{{ format_xaf($order->total) }}</span></div>
+            </div>
+        @endif
+    </section>
+@endsection

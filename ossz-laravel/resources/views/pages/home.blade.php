@@ -1,343 +1,183 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OSSZ Collections | Bring Out The Class in You</title>
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/cormorant+garamond|300;400;500;600" rel="stylesheet">
-    <link href="https://fonts.bunny.net/poppins|300;400;500;600" rel="stylesheet">
-    <style>
-        :root {
-            --ink: #1a1a1a;
-            --cream: #faf9f6;
-            --gold: #b8860b;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Poppins', sans-serif; color: var(--ink); background: var(--cream); }
-        
-        .hero {
-            position: relative;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-        .hero-bg {
-            position: absolute;
-            inset: 0;
-            background: url('/hero-bg.jpg') center/cover no-repeat;
-            animation: heroZoom 28s ease-in-out infinite;
-        }
-        @keyframes heroZoom {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.08); }
-        }
-        .hero-overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(0,0,0,0.4);
-        }
-        .hero-content {
-            position: relative;
-            text-align: center;
-            color: white;
-            z-index: 1;
-        }
-        .hero h1 {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: clamp(2rem, 5vw, 4rem);
-            font-weight: 300;
-            letter-spacing: 0.1em;
-            margin-bottom: 1rem;
-        }
-        .hero p {
-            font-size: 1rem;
-            font-weight: 300;
-            letter-spacing: 0.2em;
-            text-transform: uppercase;
-            opacity: 0.9;
-        }
-        .hero-cta {
-            margin-top: 2rem;
-        }
-        .hero-cta a {
-            display: inline-block;
-            padding: 1rem 2rem;
-            border: 1px solid white;
-            color: white;
-            text-decoration: none;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            font-size: 0.85rem;
-            transition: all 0.3s;
-        }
-        .hero-cta a:hover {
-            background: white;
-            color: var(--ink);
-        }
+@extends('layouts.app')
 
-        .nav {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 10;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.5rem 3rem;
-        }
-        .nav a {
-            color: white;
-            text-decoration: none;
-            text-transform: uppercase;
-            font-size: 0.8rem;
-            letter-spacing: 0.1em;
-            font-weight: 400;
-        }
-        .nav-center {
-            display: flex;
-            gap: 2rem;
-            align-items: center;
-        }
+@section('title', 'OSSZ Collections — Contemporary fashion house, Douala')
 
-        .services {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 0;
-            padding: 3rem 0;
-            border-bottom: 1px solid #e5e5e5;
-        }
-        .service {
-            text-align: center;
-            padding: 1.5rem;
-            border-right: 1px solid #e5e5e5;
-        }
-        .service:last-child { border-right: none; }
-        .service h4 {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            margin-bottom: 0.5rem;
-        }
-        .service p {
-            font-size: 0.75rem;
-            color: #666;
-        }
+@section('content')
+    @php $loc = locale(); @endphp
 
-        section {
-            padding: 5rem 3rem;
-        }
-        .section-title {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-        .section-title h2 {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 2rem;
-            font-weight: 300;
-        }
-
-        .collections-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
-        }
-        .collection-card {
-            aspect-ratio: 3/4;
-            overflow: hidden;
-            position: relative;
-        }
-        .collection-card img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s;
-        }
-        .collection-card:hover img {
-            transform: scale(1.05);
-        }
-        .collection-info {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 2rem;
-            background: linear-gradient(transparent, rgba(0,0,0,0.7));
-            color: white;
-        }
-        .collection-info h3 {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.5rem;
-            font-weight: 300;
-        }
-        .collection-info p {
-            font-size: 0.75rem;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            opacity: 0.8;
-        }
-
-        .footer {
-            background: var(--ink);
-            color: white;
-            padding: 4rem 3rem 2rem;
-        }
-        .footer-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
-            gap: 3rem;
-            margin-bottom: 3rem;
-        }
-        .footer h4 {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            margin-bottom: 1.5rem;
-            opacity: 0.6;
-        }
-        .footer a {
-            display: block;
-            color: white;
-            text-decoration: none;
-            font-size: 0.85rem;
-            margin-bottom: 0.75rem;
-            opacity: 0.8;
-        }
-        .footer a:hover { opacity: 1; }
-        .footer-bottom {
-            border-top: 1px solid rgba(255,255,255,0.1);
-            padding-top: 2rem;
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.75rem;
-            opacity: 0.6;
-        }
-
-        @media (max-width: 768px) {
-            .services { grid-template-columns: 1fr 1fr; }
-            .collections-grid { grid-template-columns: 1fr; }
-            .footer-grid { grid-template-columns: 1fr 1fr; }
-        }
-    </style>
-</head>
-<body>
-    <!-- Navigation -->
-    <nav class="nav">
-        <a href="/shop">Shop</a>
-        <a href="/collections">Collections</a>
-        <a href="/lookbook">Lookbook</a>
-        <div style="font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; color: white;">
-            OSSZ
-        </div>
-        <a href="/journal">Journal</a>
-        <a href="/appointments">Appointments</a>
-        <a href="/about">About</a>
-    </nav>
-
-    <!-- Hero Section -->
+    {{-- Hero --}}
     <section class="hero">
-        <div class="hero-bg"></div>
-        <div class="hero-overlay"></div>
+        @if ($hero && $hero->image_url)
+            <img src="{{ $hero->image_url }}" alt="{{ $hero->heading }}" fetchpriority="high">
+        @endif
         <div class="hero-content">
-            <h1>Bring Out The Class in You</h1>
-            <p>Révélez la classe en vous</p>
-            <div class="hero-cta">
-                <a href="/collections">Discover Our Collections</a>
+            <h1 class="display">{{ \App\Support\I18n::pick($hero->heading ?? '', $hero->heading_fr ?? '') }}</h1>
+            <div class="hero-actions">
+                <a href="{{ $hero->cta_href ?? '/shop' }}" class="btn btn-primary" style="background:#fff;color:var(--ink)">
+                    {{ \App\Support\I18n::pick($hero->cta_label ?? '', $hero->cta_label_fr ?? '') }}
+                </a>
+                <a href="{{ route('appointments') }}" class="btn btn-secondary" style="color:#fff;border-color:rgba(255,255,255,.3)">
+                    {{ t('home.bookCta') }}
+                </a>
             </div>
         </div>
     </section>
 
-    <!-- Services Strip -->
-    <div class="services">
-        <div class="service">
-            <h4>National Delivery</h4>
-            <p>Shipped in 2–4 days across Cameroon</p>
+    {{-- New arrivals --}}
+    <section class="section wrap">
+        <div class="section-head">
+            <div>
+                <p class="eyebrow">{{ t('home.newEyebrow') }}</p>
+                <h2 class="display">{{ t('home.newTitle') }}</h2>
+                <p class="intro">{{ t('home.newIntro') }}</p>
+            </div>
+            <a class="btn btn-ghost" href="{{ route('shop') }}">{{ t('home.shopAll') }} →</a>
         </div>
-        <div class="service">
-            <h4>Payment Options</h4>
-            <p>MTN MoMo & Orange Money · Visa & Mastercard</p>
-        </div>
-        <div class="service">
-            <h4>Complimentary Alterations</h4>
-            <p>Within 30 days of purchase</p>
-        </div>
-        <div class="service">
-            <h4>OSSZ Concierge</h4>
-            <p>Chat with us, any time</p>
-        </div>
-    </div>
-
-    <!-- Collections -->
-    <section>
-        <div class="section-title">
-            <p style="font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 0.5rem;">Curated for the modern connoisseur</p>
-            <h2>Our Collections</h2>
-        </div>
-        <div class="collections-grid">
-            <a href="/collections/check-moves" class="collection-card">
-                <img src="/collections/check-moves.webp" alt="Check Moves">
-                <div class="collection-info">
-                    <p>2023</p>
-                    <h3>Check Moves</h3>
-                </div>
-            </a>
-            <a href="/collections/freeme" class="collection-card">
-                <img src="/collections/freeme.webp" alt="Freeme">
-                <div class="collection-info">
-                    <p>2021</p>
-                    <h3>Freeme</h3>
-                </div>
-            </a>
-            <a href="/collections/cultural-heritage" class="collection-card">
-                <img src="/collections/cultural-heritage.webp" alt="Cultural Heritage">
-                <div class="collection-info">
-                    <p>2024</p>
-                    <h3>Cultural Heritage</h3>
-                </div>
-            </a>
-        </div>
-        <div style="text-align: center; margin-top: 3rem;">
-            <a href="/collections" style="color: var(--ink); text-decoration: none; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.85rem; border-bottom: 1px solid var(--ink); padding-bottom: 0.25rem;">
-                Discover Our Collections
-            </a>
+        <div class="grid grid-4">
+            @foreach ($newArrivals as $p)
+                @include('partials.product-card', ['p' => $p])
+            @endforeach
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-grid">
-            <div>
-                <h4>OSSZ</h4>
-                <p style="font-size: 0.85rem; opacity: 0.8; line-height: 1.6;">
-                    Limited-edition garments, masterfully tailored by people we know. Designed, cut, and finished entirely within our local Douala atelier.
-                </p>
+    {{-- Collection banner --}}
+    @if ($banner)
+        <section class="bg-dark">
+            <div class="grid" style="grid-template-columns:1fr 1fr;align-items:stretch">
+                <div class="photo-frame" style="aspect-ratio:4/3;border-radius:0">
+                    @if ($banner->image_url)
+                        <img src="{{ $banner->image_url }}" alt="{{ $banner->heading }}">
+                    @endif
+                </div>
+                <div style="display:flex;flex-direction:column;justify-content:center;gap:1.2rem;padding:4rem">
+                    <p class="eyebrow" style="color:rgba(255,255,255,.7)">{{ \App\Support\I18n::pick($banner->eyebrow, $banner->eyebrow_fr) }}</p>
+                    <h2 class="display" style="font-size:1.9rem">{{ \App\Support\I18n::pick($banner->heading, $banner->heading_fr) }}</h2>
+                    <p style="max-width:28rem;font-size:.9rem;color:rgba(255,255,255,.8)">{{ \App\Support\I18n::pick($banner->body, $banner->body_fr) }}</p>
+                    <a href="{{ $banner->cta_href }}" class="btn btn-secondary" style="color:#fff;border-color:#fff;width:fit-content">
+                        {{ \App\Support\I18n::pick($banner->cta_label, $banner->cta_label_fr) }}
+                    </a>
+                </div>
             </div>
+        </section>
+    @endif
+
+    {{-- Featured --}}
+    <section class="section wrap">
+        <div class="section-head">
             <div>
-                <h4>Shop</h4>
-                <a href="/shop">All Products</a>
-                <a href="/collections">Collections</a>
-                <a href="/lookbook">Lookbook</a>
+                <p class="eyebrow">{{ t('home.editEyebrow') }}</p>
+                <h2 class="display">{{ t('home.editTitle') }}</h2>
             </div>
-            <div>
-                <h4>Information</h4>
-                <a href="/about">About Us</a>
-                <a href="/journal">Journal</a>
-                <a href="/appointments">Book Appointment</a>
+            <a class="btn btn-ghost" href="{{ route('shop', ['sort' => 'popular']) }}">{{ t('home.editLink') }} →</a>
+        </div>
+        <div class="grid grid-4">
+            @foreach ($featured as $p)
+                @include('partials.product-card', ['p' => $p])
+            @endforeach
+        </div>
+    </section>
+
+    {{-- Collections --}}
+    <section class="section bg-paper">
+        <div class="wrap">
+            <div class="section-head">
+                <div>
+                    <p class="eyebrow">{{ t('home.colsEyebrow') }}</p>
+                    <h2 class="display">{{ t('home.colsTitle') }}</h2>
+                </div>
+                <a class="btn btn-ghost" href="{{ route('collections.index') }}">{{ t('home.colsLink') }} →</a>
             </div>
-            <div>
-                <h4>Contact</h4>
-                <a href="https://wa.me/237694068219">WhatsApp</a>
-                <a href="mailto:info@osszcollection.com">Email Us</a>
-                <a href="https://instagram.com/theossz__">Instagram</a>
+            <div class="grid grid-3">
+                @foreach ($collections as $c)
+                    <a href="{{ route('collections.show', $c->slug) }}" class="product-card">
+                        <div class="photo-frame" style="aspect-ratio:4/5">
+                            @if ($c->cover_image)<img src="{{ $c->cover_image }}" alt="{{ $c->name }}" loading="lazy">@endif
+                            <div style="position:absolute;inset:auto 0 0 0;padding:1.5rem;color:#fff;background:linear-gradient(to top,rgba(0,0,0,.6),transparent)">
+                                <p class="eyebrow" style="color:rgba(255,255,255,.75)">{{ \App\Support\I18n::pick($c->season, $c->season_fr) }}</p>
+                                <h3 class="display" style="font-size:1.4rem">{{ \App\Support\I18n::pick($c->name, $c->name_fr) }}</h3>
+                            </div>
+                        </div>
+                        <p style="margin-top:.75rem;font-size:.85rem;color:var(--ink-soft)">{{ \App\Support\I18n::pick($c->description, $c->description_fr) }}</p>
+                    </a>
+                @endforeach
             </div>
         </div>
-        <div class="footer-bottom">
-            <p>Ange Raphael, Douala, Cameroon</p>
-            <p>© {{ date('Y') }} OSSZ Collections. All rights reserved.</p>
+    </section>
+
+    {{-- Lookbook teaser --}}
+    <section class="section wrap">
+        <div class="section-head">
+            <div>
+                <p class="eyebrow">{{ t('home.lookEyebrow') }}</p>
+                <h2 class="display">{{ t('home.lookTitle') }}</h2>
+            </div>
+            <a class="btn btn-ghost" href="{{ route('lookbook') }}">{{ t('home.lookLink') }} →</a>
         </div>
-    </footer>
-</body>
-</html>
+        <div class="grid grid-3">
+            @foreach ($looks as $look)
+                <figure>
+                    <div class="photo-frame" style="aspect-ratio:3/4">
+                        @if ($look->media_type === 'video' && $look->video_url)
+                            <video src="{{ $look->video_url }}" poster="{{ $look->poster_url }}" muted playsinline preload="metadata"></video>
+                        @elseif ($look->image_url)
+                            <img src="{{ $look->image_url }}" alt="{{ $look->title }}" loading="lazy">
+                        @endif
+                    </div>
+                    <figcaption style="margin-top:.5rem;font-size:.72rem;color:var(--muted)">{{ \App\Support\I18n::pick($look->caption, $look->caption_fr) }}</figcaption>
+                </figure>
+            @endforeach
+        </div>
+    </section>
+
+    {{-- Brand story + journal --}}
+    <section class="section" style="background:rgba(241,242,244,.4)">
+        <div class="wrap grid" style="grid-template-columns:1fr 1fr;align-items:center">
+            <div>
+                <p class="eyebrow">{{ t('home.storyEyebrow') }}</p>
+                <h2 class="display" style="font-size:1.8rem;margin-top:.8rem">{{ t('home.storyTitle') }}</h2>
+                <p style="margin-top:1.2rem;font-size:.9rem;color:var(--ink-soft)">{{ t('home.storyBody') }}</p>
+                <div style="margin-top:1.8rem;display:flex;gap:.75rem;flex-wrap:wrap">
+                    <a href="{{ route('about') }}" class="btn btn-secondary">{{ t('home.storyCta') }}</a>
+                    <a href="{{ route('journal.index') }}" class="btn btn-ghost">{{ t('home.journalCta') }}</a>
+                </div>
+            </div>
+            <div style="display:grid;gap:1.2rem">
+                @foreach ($posts as $post)
+                    <a href="{{ route('journal.show', $post->slug) }}" class="card" style="display:flex;gap:1rem;padding:1rem">
+                        <div class="photo-frame photo-frame-sm" style="width:96px;height:96px;flex-shrink:0">
+                            @if ($post->cover_image)<img src="{{ $post->cover_image }}" alt="{{ $post->title }}" loading="lazy">@endif
+                        </div>
+                        <div>
+                            <h3 class="display" style="font-size:1.15rem">{{ \App\Support\I18n::pick($post->title, $post->title_fr) }}</h3>
+                            <p style="margin-top:.25rem;font-size:.72rem;color:var(--ink-soft)">{{ \App\Support\I18n::pick($post->excerpt, $post->excerpt_fr) }}</p>
+                        </div>
+                    </a>
+                @endforeach
+                @if ($invite)
+                    <div class="card" style="background:var(--canvas);padding:1.25rem">
+                        <p class="eyebrow">{{ \App\Support\I18n::pick($invite->eyebrow, $invite->eyebrow_fr) }}</p>
+                        <h3 class="display" style="font-size:1.15rem;margin-top:.3rem">{{ \App\Support\I18n::pick($invite->heading, $invite->heading_fr) }}</h3>
+                        <p style="margin-top:.5rem;font-size:.78rem;color:var(--ink-soft)">{{ \App\Support\I18n::pick($invite->body, $invite->body_fr) }}</p>
+                        <a href="{{ $invite->cta_href }}" class="btn btn-primary btn-sm" style="margin-top:1rem">
+                            {{ \App\Support\I18n::pick($invite->cta_label, $invite->cta_label_fr) }}
+                        </a>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </section>
+
+    {{-- Contact CTA --}}
+    <section class="bg-dark" style="padding:2.5rem 0">
+        <div class="wrap" style="text-align:center;display:grid;gap:.8rem;justify-items:center">
+            <p style="font-size:.9rem;color:rgba(255,255,255,.9)">
+                {{ is_fr() ? 'Besoin d\'aide pour trouver la bonne pièce ? Nous sommes là pour vous.' : 'Need help finding the right piece? We are here for you.' }}
+            </p>
+            <a href="{{ route('contact') }}" class="btn" style="background:#fff;color:var(--ink)">{{ is_fr() ? 'Nous contacter' : 'Get in touch' }}</a>
+            <p style="font-size:.72rem;color:rgba(255,255,255,.5)">
+                {{ is_fr() ? 'Ou écrivez-nous à' : 'Or write to us directly at' }}
+                <a href="mailto:info@osszcollection.com" style="color:var(--accent)">{{ \App\Support\Settings::get('contact_email') }}</a>
+            </p>
+        </div>
+    </section>
+@endsection

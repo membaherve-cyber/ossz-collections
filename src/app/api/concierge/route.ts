@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { aiConversations } from "@/db/schema";
-import { getCurrentUser, getGuestId } from "@/lib/auth";
-import { buildSystemPrompt, fallbackReply } from "@/lib/concierge-tools";
+import { getCurrentUser, getGuestId, type SessionUser } from "@/lib/auth";
+import { buildSystemPrompt, fallbackReply, deriveState } from "@/lib/concierge-tools";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -139,8 +139,17 @@ export async function POST(request: Request) {
   // lands in the grace window; otherwise the knowledge-base
   // reply is returned immediately — the visitor never waits on the API.
   const system = await buildSystemPrompt(locale);
+  const state = deriveState(history);
   const geminiP = callGemini(system, history);
-  const kb = await fallbackReply(last.content);
+  const kb = await fallbackReply(last.content, state, sessionId);
+
+  // Retrieval-first rule: when the grounded reply carries real product cards
+  // (verified catalogue results), it always wins over LLM prose — the LLM
+  // must never replace a verified product answer with an unverified one.
+  if (kb.reply.includes("CARD_START:")) {
+    await persistTranscript(history, kb, user, sessionId);
+    return NextResponse.json({ reply: kb.reply, escalated: kb.escalated });
+  }
 
   const outcome = await (async (): Promise<Outcome> => {
     const geminiResult = await Promise.race([
@@ -148,12 +157,39 @@ export async function POST(request: Request) {
       new Promise<{ kind: "timeout"; value: null }>((resolve) => setTimeout(() => resolve({ kind: "timeout", value: null }), 1200)),
     ]);
     if (geminiResult.kind === "gemini") {
+      // Even when Gemini replies, keep the knowledge-base reply as a safe
+      // fallback if Gemini's answer looks like a handoff or is empty.
       return geminiResult.value ?? kb;
     }
     return kb;
   })();
 
   const transcript = [...history, { role: "assistant" as const, content: outcome.reply }];
+  await persistTranscriptRaw(transcript, user, sessionId, outcome);
+
+  return NextResponse.json({ reply: outcome.reply, escalated: outcome.escalated });
+}
+
+async function persistTranscript(
+  history: ChatMessage[],
+  outcome: Outcome,
+  user: SessionUser | null,
+  sessionId: string,
+): Promise<void> {
+  await persistTranscriptRaw(
+    [...history, { role: "assistant" as const, content: outcome.reply }],
+    user,
+    sessionId,
+    outcome,
+  );
+}
+
+async function persistTranscriptRaw(
+  transcript: ChatMessage[],
+  user: SessionUser | null,
+  sessionId: string,
+  outcome: Outcome,
+): Promise<void> {
   try {
     const existing = (
       await db.select().from(aiConversations).where(eq(aiConversations.sessionId, sessionId)).limit(1)
@@ -179,6 +215,4 @@ export async function POST(request: Request) {
   } catch {
     // logging must never break the conversation
   }
-
-  return NextResponse.json({ reply: outcome.reply, escalated: outcome.escalated });
 }

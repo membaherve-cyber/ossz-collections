@@ -15,8 +15,34 @@ export function slugify(input: string): string {
     .slice(0, 70);
 }
 
-export function cn(...parts: Array<string | false | null | undefined>): string {
-  return parts.filter(Boolean).join(" ");
+/**
+ * Merge CSS class names. Filters falsy values and joins with spaces.
+ * This is the shadcn/ui-compatible cn utility.
+ *
+ * For projects using clsx + tailwind-merge, swap this implementation.
+ * The signature is intentionally compatible with clsx/tailwind-merge.
+ */
+export function cn(...inputs: Array<string | false | null | undefined>): string {
+  return inputs.filter(Boolean).join(" ");
+}
+
+/**
+ * Merge class names with deduplication.
+ * Use this when combining classes that might conflict.
+ */
+export function cnMerge(...inputs: Array<string | false | null | undefined>): string {
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const input of inputs) {
+    if (!input) continue;
+    for (const cls of input.split(" ").filter(Boolean)) {
+      if (!seen.has(cls)) {
+        seen.add(cls);
+        result.push(cls);
+      }
+    }
+  }
+  return result.join(" ");
 }
 
 export function makeOrderNumber(): string {

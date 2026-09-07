@@ -24,4 +24,10 @@ yarn-debug.log*
 yarn-error.log*
 /coverage
 *.tsbuildinfo
+
+# preview tooling
+.freebuff/
+.php-lint/
+
+.vercel
 ossz-laravel/ - Copy.env

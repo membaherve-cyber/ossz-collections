@@ -1,188 +1,233 @@
-# OSSZ Collections Laravel - Deployment Guide for Namecheap
+# OSSZ Collections — Laravel PHP Conversion
 
-## Prerequisites
-- Namecheap hosting with cPanel access
-- PHP 8.2+ support
-- PostgreSQL database (Neon)
-- Composer installed locally
+## Overview
 
-## Step 1: Prepare the Application Locally
+This is a complete PHP/Laravel 11 conversion of the OSSZ Collections Next.js e-commerce site. The conversion includes:
+
+- **Storefront**: Home, shop, product detail, collections, journal, lookbook, FAQ, size guide, about, contact, appointments, search
+- **Cart & Checkout**: Add to cart, coupon codes, checkout with delivery zones and payment methods
+- **Auth**: Login, register, password reset, session management
+- **Account**: Profile, orders, addresses, wishlist, appointments
+- **Admin Backoffice**: Dashboard, orders, products, inventory, collections, coupons, customers, staff, appointments, contact messages, AI gaps, notifications, settings, homepage blocks, journal, lookbook, FAQs, media library
+- **Concierge AI**: Gemini-powered chat with product cards and knowledge base fallback
+- **i18n**: Full English/French interface support
+
+## Requirements
+
+- PHP 8.2+
+- MySQL/MariaDB (or PostgreSQL)
+- Composer
+- Web server (Apache with mod_rewrite or Nginx)
+
+## Installation
+
+### 1. Upload to Server
+
+Upload the entire `ossz-laravel/` folder to your web server.
+
+### 2. Configure Environment
 
 ```bash
-# Install dependencies
-composer install --optimize-autoloader --no-dev
-
-# Generate application key
+cp .env.example .env
 php artisan key:generate
+```
 
-# Run migrations
+Edit `.env` with your database credentials:
+
+```
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=ossz
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
+```
+
+### 3. Set Up Database
+
+```bash
 php artisan migrate
-
-# Seed the database
 php artisan db:seed
+```
 
-# Cache configuration
+This creates all tables and populates them with:
+- Staff accounts (admin@osszcollection.com, staff@osszcollection.com, uploader@osszcollection.com)
+- Categories and collections
+- Sample products
+- Delivery zones
+- Settings
+- Homepage blocks
+- FAQs
+- Journal posts
+
+### 4. Set Permissions
+
+```bash
+chmod -R 775 storage bootstrap/cache
+chmod -R 755 public
+```
+
+### 5. Configure Web Server
+
+**Apache**: Point DocumentRoot to `public/` folder
+
+**Nginx**:
+```nginx
+server {
+    listen 80;
+    server_name yourdomain.com;
+    root /path/to/ossz-laravel/public;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+}
+```
+
+### 6. Cache Configuration (Production)
+
+```bash
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 ```
 
-## Step 2: Upload Files to Namecheap
+## Default Staff Accounts
 
-1. Log into cPanel at osszcollection.com
-2. Open **File Manager**
-3. Navigate to `public_html/`
-4. Upload the entire `ossz-laravel` folder contents
+| Email | Username | Password | Role |
+|-------|----------|----------|------|
+| admin@osszcollection.com | admin | OsszAdmin2026! | admin |
+| staff@osszcollection.com | staff | OsszStaff2026! | staff |
+| uploader@osszcollection.com | uploader | OsszUpload2026! | uploader |
 
-**Important:** Upload these folders/files to `public_html/`:
-- `app/` - Application logic
-- `bootstrap/` - Framework bootstrap
-- `config/` - Configuration
-- `database/` - Migrations and seeders
-- `public/` - Public assets (this becomes your web root)
-- `resources/` - Views and assets
-- `routes/` - Route definitions
-- `storage/` - Logs, cache, sessions
-- `vendor/` - Composer dependencies
-- `.env` - Environment configuration
-- `artisan` - CLI entry point
-- `composer.json`
-- `composer.lock`
+## Optional Integrations
 
-## Step 3: Configure cPanel
+### Gemini AI Concierge
 
-### Set Document Root
-1. In cPanel, go to **Domains**
-2. Click **Manage** next to `osszcollection.com`
-3. Set Document Root to: `public_html/public`
-
-### Set PHP Version
-1. Go to **Select PHP Version**
-2. Choose PHP 8.2 or higher
-3. Enable these extensions:
-   - `pgsql`
-   - `pdo_pgsql`
-   - `mbstring`
-   - `openssl`
-   - `tokenizer`
-   - `xml`
-   - `ctype`
-   - `json`
-   - `curl`
-
-## Step 4: Configure .env
-
-Edit `public_html/.env`:
-
-```env
-APP_NAME="OSSZ Collections"
-APP_ENV=production
-APP_KEY=base64:YOUR_GENERATED_KEY
-APP_DEBUG=false
-APP_URL=https://osszcollection.com
-
-LOG_CHANNEL=stack
-LOG_LEVEL=error
-
-DB_CONNECTION=pgsql
-DB_HOST=ep-shiny-smoke-asvvjgmv-pooler.c-4.eu-central-1.aws.neon.tech
-DB_PORT=5432
-DB_DATABASE=la%20maison%20bibi
-DB_USERNAME=neondb_owner
-DB_PASSWORD=YOUR_NEON_PASSWORD
-
-SESSION_DRIVER=database
-SESSION_LIFETIME=120
-
-CACHE_STORE=database
-
-GEMINI_API_KEY=YOUR_GEMINI_API_KEY_HERE
-GEMINI_API_KEY2=YOUR_SECOND_API_KEY_HERE
-
-WHATSAPP_NUMBER=+YOUR_WHATSAPP_NUMBER
-CONTACT_EMAIL=info@osszcollection.com
+Set these in `.env`:
+```
+GEMINI_API_KEY=your_key
+GEMINI_API_KEY2=your_backup_key
 ```
 
-## Step 5: Set Permissions
+Without keys, the concierge falls back to the knowledge base.
 
-In cPanel File Manager, set these permissions:
-- `storage/` - 775 (recursive)
-- `bootstrap/cache/` - 775 (recursive)
-- `public/` - 755
-- All other folders - 755
+### Email Notifications
 
-## Step 6: Run Artisan via SSH
+Set these in `.env`:
+```
+RESEND_API_KEY=your_key
+RESEND_FROM="OSSZ Collections <hello@osszcollection.com>"
+```
 
-1. Go to **Terminal** in cPanel (or use SSH)
-2. Navigate to the app directory:
+Without keys, emails are queued and visible in the backoffice.
+
+## Key Features
+
+### Product Catalogue
+
+- Products with variants (size, colour, stock)
+- Multiple images per product
+- Categories and collections
+- Full-text search
+- Price filters
+
+### Cart & Checkout
+
+- Guest and logged-in carts
+- Coupon codes (percentage, fixed, free delivery)
+- Delivery zones with fees
+- Payment methods: MTN MoMo, Orange Money, Card, Cash on Delivery
+- Order confirmation via email and WhatsApp
+
+### Concierge AI
+
+- Gemini-powered conversational assistant
+- Product recommendation engine
+- Knowledge base with FAQ and delivery info
+- Escalation to WhatsApp
+- AI gaps logging for staff review
+
+### Admin Backoffice
+
+- Real-time dashboard with stats
+- Order management with status updates
+- Product CRUD with variants and images
+- Inventory tracking with low stock alerts
+- Staff role management
+- Contact message inbox with reply
+- Content management (homepage, journal, lookbook, FAQs)
+- Settings editor
+
+## File Structure
+
+```
+ossz-laravel/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/      # All controllers
+│   │   └── Middleware/        # Auth middleware
+│   ├── Models/               # Eloquent models
+│   └── Support/              # Helper classes
+├── config/                   # Laravel configs
+├── database/
+│   ├── migrations/           # Database schema
+│   └── seeders/              # Sample data
+├── public/                   # Web root
+├── resources/
+│   └── views/                # Blade templates
+├── routes/
+│   └── web.php               # All routes
+└── storage/                  # Logs, cache
+```
+
+## Development
+
+### Run Locally
+
 ```bash
-cd ~/public_html
+composer install
+php artisan migrate
+php artisan serve
 ```
 
-3. Run artisan commands:
+### Run Tests
+
 ```bash
-php artisan migrate --force
-php artisan db:seed --force
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
+php artisan test
 ```
 
-## Step 7: SSL Certificate
+## Notes
 
-Namecheap provides free SSL with hosting:
-1. Go to **SSL/TLS Status** in cPanel
-2. Click **Run AutoSSL** for osszcollection.com
-
-## Step 8: Cron Jobs
-
-Go to **Cron Jobs** in cPanel and add:
-
-```
-* * * * * cd /home/osszcollection/public_html && php artisan schedule:run >> /dev/null 2>&1
-```
-
-## Step 9: Verify Deployment
-
-Visit:
-- https://osszcollection.com - Public shop
-- https://osszcollection.com/admin - Backoffice (login required)
-
-Default credentials (change after first login):
-- Email: admin@osszcollection.com
-- Password: password
+- The site uses Tailwind CSS via the compiled `public/css/app.css` file
+- The design system matches the original Next.js site exactly
+- The concierge uses both Gemini API keys in parallel for fastest response
+- Product cards in chat are formatted with `PRODUCT:slug|NAME:x|PRICE:y|STOCK:z|IMG:u`
+- Uploaded files go to `storage/app/` and are served via `/media/{path}` route
 
 ## Troubleshooting
 
+### Database Connection Error
+
+Check `.env` has correct DB credentials and the database exists.
+
 ### 500 Error
-- Check `.env` has valid `APP_KEY`
-- Verify `storage/` is writable
-- Check `storage/logs/laravel.log`
 
-### Database Connection
-- Verify Neon database credentials
-- Ensure PostgreSQL extension is enabled in PHP
+Check `storage/logs/laravel.log` for details.
 
-### Routes Not Working
-- Verify `.htaccess` is in `public/` folder
-- Check mod_rewrite is enabled
+### CSS Not Loading
 
-### Session Issues
-- Ensure `sessions` table exists (run migrations)
-- Check `storage/` permissions
+Run `php artisan storage:link` if using file uploads.
 
-## Post-Deployment Checklist
+### Route Not Found
 
-- [ ] Change default admin password
-- [ ] Update `APP_URL` to production
-- [ ] Set `APP_DEBUG=false`
-- [ ] Verify SSL is working
-- [ ] Test all pages
-- [ ] Test checkout flow
-- [ ] Test concierge chatbot
-- [ ] Test order tracking
-- [ ] Test email notifications
-- [ ] Set up monitoring
+Ensure `.htaccess` is in `public/` and mod_rewrite is enabled.
 
 ---
 

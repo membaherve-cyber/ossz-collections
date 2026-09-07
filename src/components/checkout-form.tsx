@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useActionState, useState } from "react";
-import { placeOrderAction, type ActionState } from "@/lib/actions";
+import { createPendingOrderAction, type ActionState } from "@/lib/payment-actions";
 import { formatXAF } from "@/lib/utils";
 import { t, type Locale } from "@/lib/i18n";
 
@@ -36,7 +36,7 @@ export function CheckoutForm({
   guestMode: boolean;
   preferredPayment?: string;
 }) {
-  const [state, action, pending] = useActionState(placeOrderAction, initial);
+  const [state, action, pending] = useActionState(createPendingOrderAction, initial);
   const [zoneId, setZoneId] = useState(zones[0]?.id ?? 0);
   const [payment, setPayment] = useState(preferredPayment || "mobile_money_mtn");
   const [createAccount, setCreateAccount] = useState(false);
@@ -87,11 +87,10 @@ export function CheckoutForm({
               />
             </div>
             <div>
-              <label className="label" htmlFor="phone">Phone (MoMo number if paying by mobile money)</label>
+              <label className="label" htmlFor="phone">Phone (required for MoMo/Orange Money)</label>
               <input
                 id="phone"
                 name="phone"
-                required
                 defaultValue={user?.phone ?? ""}
                 onChange={(e) => setAddr((a) => ({ ...a, phone: e.target.value }))}
                 className="field"
@@ -99,8 +98,9 @@ export function CheckoutForm({
               />
             </div>
             <div className="sm:col-span-2">
-              <label className="label" htmlFor="email">Email</label>
-              <input id="email" name="email" type="email" required defaultValue={user?.email ?? ""} className="field" />
+              <label className="label" htmlFor="email">Email (for order updates)</label>
+              <input id="email" name="email" type="email" defaultValue={user?.email ?? ""} className="field" placeholder="your@email.com" />
+              <p className="text-xs text-muted mt-1">Optional — provide email or phone (or both) so we can send you order updates.</p>
             </div>
           </div>
 
@@ -295,7 +295,7 @@ export function CheckoutForm({
         </dl>
 
         <button className="btn btn-primary mt-6 w-full" disabled={pending || !addressConfirmed}>
-          {pending ? t(locale, "checkout.placing") : t(locale, "checkout.place")}
+          {pending ? "Preparing payment..." : "Continue to Payment"}
         </button>
         {!addressConfirmed ? (
           <p className="mt-2 text-center text-xs text-muted">{t(locale, "checkout.mustConfirm")}</p>
@@ -304,8 +304,8 @@ export function CheckoutForm({
           <p className="mt-3 text-xs text-red-600">{state.message}</p>
         ) : null}
         <p className="mt-4 text-xs leading-relaxed text-muted">
-          By placing this order you agree to our returns policy. You will receive an email and a
-          WhatsApp confirmation with your order number.
+          You will be taken to a payment confirmation page where you can upload proof of payment.
+          You will receive an email and a WhatsApp confirmation with your order number.
         </p>
       </aside>
     </form>

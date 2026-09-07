@@ -22,7 +22,9 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
     // Editorial photography tolerates a lower quality floor than the default 75
     // with no visible loss, and it is the single biggest byte saving on mobile.
-    qualities: [58, 65, 75],
+    // 90 is reserved for hero/editorial banner photography where compression
+    // artefacts are visible; the rest of the catalogue stays on the cheap ladder.
+    qualities: [58, 65, 75, 90],
     // Remote editorial images are immutable once published.
     minimumCacheTTL: 60 * 60 * 24 * 30,
   },

@@ -14,13 +14,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \Illuminate\Session\Middleware\StartSession::class,
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
-            \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ]);
 
         $middleware->alias([
             'auth' => \App\Http\Middleware\Authenticate::class,
-            'role' => \App\Http\Middleware\CheckRole::class,
+            'auth.customer' => \App\Http\Middleware\Authenticate::class.':customer',
+            'auth.admin' => \App\Http\Middleware\Authenticate::class.':admin',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

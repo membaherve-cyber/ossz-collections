@@ -377,3 +377,165 @@ body {
 .animate-bounce-slow {
   animation: bounce-slow 2s ease-in-out infinite;
 }
+
+/* ================================================================
+   FREEBUFF PREMIUM UI/UX ENGINE — Design Tokens
+   Global design-system tokens available to all projects.
+   Projects can override any token locally without affecting others.
+   ================================================================ */
+
+:root {
+  /* --- Elevation (shadow scale) --- */
+  --fb-shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --fb-shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --fb-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --fb-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --fb-shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --fb-shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+
+  /* --- Border Radius --- */
+  --fb-radius-none: 0;
+  --fb-radius-xs: 0.125rem;
+  --fb-radius-sm: 0.25rem;
+  --fb-radius-md: 0.375rem;
+  --fb-radius-lg: 0.5rem;
+  --fb-radius-xl: 0.75rem;
+  --fb-radius-2xl: 1rem;
+  --fb-radius-full: 9999px;
+
+  /* --- Z-Index Scale --- */
+  --fb-z-dropdown: 50;
+  --fb-z-sticky: 100;
+  --fb-z-overlay: 200;
+  --fb-z-modal: 300;
+  --fb-z-popover: 400;
+  --fb-z-toast: 500;
+
+  /* --- Spacing Scale --- */
+  --fb-space-0: 0;
+  --fb-space-px: 1px;
+  --fb-space-0-5: 0.125rem;
+  --fb-space-1: 0.25rem;
+  --fb-space-1-5: 0.375rem;
+  --fb-space-2: 0.5rem;
+  --fb-space-3: 0.75rem;
+  --fb-space-4: 1rem;
+  --fb-space-5: 1.25rem;
+  --fb-space-6: 1.5rem;
+  --fb-space-8: 2rem;
+  --fb-space-10: 2.5rem;
+  --fb-space-12: 3rem;
+  --fb-space-16: 4rem;
+  --fb-space-20: 5rem;
+  --fb-space-24: 6rem;
+  --fb-space-32: 8rem;
+
+  /* --- Duration Scale --- */
+  --fb-duration-micro: 100ms;
+  --fb-duration-fast: 150ms;
+  --fb-duration-normal: 250ms;
+  --fb-duration-slow: 400ms;
+  --fb-duration-deliberate: 600ms;
+
+  /* --- Easing Scale --- */
+  --fb-ease-default: cubic-bezier(0.22, 1, 0.36, 1);
+  --fb-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --fb-ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --fb-ease-gentle: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --- Motion Keyframes (global) --- */
+@keyframes fb-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fb-slide-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fb-scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fb-slide-in-right {
+  from { opacity: 0; transform: translateX(100%); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fb-skeleton-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes fb-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fb-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* --- Motion Utility Classes --- */
+.fb-animate-fade-in {
+  animation: fb-fade-in var(--fb-duration-normal) var(--fb-ease-default) both;
+}
+.fb-animate-slide-up {
+  animation: fb-slide-up var(--fb-duration-slow) var(--fb-ease-default) both;
+}
+.fb-animate-scale-in {
+  animation: fb-scale-in var(--fb-duration-normal) var(--fb-ease-spring) both;
+}
+.fb-animate-slide-right {
+  animation: fb-slide-in-right var(--fb-duration-slow) var(--fb-ease-default) both;
+}
+.fb-animate-pulse {
+  animation: fb-pulse 2s var(--fb-ease-gentle) infinite;
+}
+.fb-animate-spin {
+  animation: fb-spin 1s linear infinite;
+}
+
+/* --- Skeleton Loader --- */
+.fb-skeleton {
+  background: linear-gradient(90deg, var(--color-line) 25%, var(--color-canvas) 37%, var(--color-line) 63%);
+  background-size: 200% 100%;
+  animation: fb-skeleton-shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--fb-radius-sm);
+}
+
+/* --- Focus Ring --- */
+.fb-focus-ring:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* --- Stagger Children --- */
+.fb-stagger > * {
+  animation: fb-slide-up var(--fb-duration-slow) var(--fb-ease-default) both;
+}
+.fb-stagger > *:nth-child(1) { animation-delay: 0ms; }
+.fb-stagger > *:nth-child(2) { animation-delay: 60ms; }
+.fb-stagger > *:nth-child(3) { animation-delay: 120ms; }
+.fb-stagger > *:nth-child(4) { animation-delay: 180ms; }
+.fb-stagger > *:nth-child(5) { animation-delay: 240ms; }
+.fb-stagger > *:nth-child(6) { animation-delay: 300ms; }
+.fb-stagger > *:nth-child(7) { animation-delay: 360ms; }
+.fb-stagger > *:nth-child(8) { animation-delay: 420ms; }
+
+/* --- Reduced Motion (already supported above, enhanced here) --- */
+@media (prefers-reduced-motion: reduce) {
+  .fb-animate-fade-in,
+  .fb-animate-slide-up,
+  .fb-animate-scale-in,
+  .fb-animate-slide-right,
+  .fb-animate-pulse,
+  .fb-stagger > * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

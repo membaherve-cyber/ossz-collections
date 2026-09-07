@@ -1,0 +1,33 @@
+<?php
+
+return [
+    'default' => env('FILESYSTEM_DISK', 'local'),
+    'disks' => [
+        'local' => [
+            'driver' => 'local',
+            'root' => storage_path('app'),
+            'throw' => false,
+        ],
+        /**
+         * Customer uploads (payment proofs, lookbook videos, media library).
+         * Files are stored under storage/app and served through
+         * /media/{path} by the MediaFileController so the web root never
+         * needs to expose storage directly (shared-host friendly).
+         */
+        'local_custom' => [
+            'driver' => 'local',
+            'root' => storage_path('app'),
+            'throw' => false,
+        ],
+        'public' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public'),
+            'url' => env('APP_URL').'/storage',
+            'visibility' => 'public',
+            'throw' => false,
+        ],
+    ],
+    'links' => [
+        public_path('storage') => storage_path('app/public'),
+    ],
+];

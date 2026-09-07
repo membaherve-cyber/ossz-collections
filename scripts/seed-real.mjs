@@ -211,6 +211,21 @@ async function main() {
     await c.query("delete from products");
     await c.query("delete from lookbook_items");
 
+    // Ensure every category referenced by the catalogue actually exists —
+    // otherwise category_id is silently null and category filtering never
+    // matches anything (shop filters, concierge retrieval, admin stats).
+    const CATS = [...new Set(CATALOGUE.map((p) => p.cat))];
+    for (const [i, slug] of CATS.entries()) {
+      const name = slug
+        .split("-")
+        .map((w) => w[0].toUpperCase() + w.slice(1))
+        .join(" ");
+      await c.query(
+        "insert into categories (name, slug, sort_order) values ($1,$2,$3) on conflict (slug) do nothing",
+        [name, slug, 100 + i],
+      );
+    }
+
     const cats = Object.fromEntries(
       (await c.query("select id, slug from categories")).rows.map((r) => [r.slug, r.id]),
     );

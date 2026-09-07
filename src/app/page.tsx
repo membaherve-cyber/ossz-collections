@@ -8,9 +8,9 @@ import { ProductGrid } from "@/components/product-grid";
 import { SectionHead } from "@/components/ui";
 import { getLocale } from "@/lib/locale-server";
 import { t, pick } from "@/lib/i18n-pages";
+import { LookbookVideo } from "@/components/lookbook-video";
 
 export const dynamic = "force-dynamic";
-
 export default async function HomePage() {
   const locale = await getLocale();
   const [blocks, newArrivals, featured, cols, looks, posts] = await Promise.all([
@@ -31,8 +31,6 @@ export default async function HomePage() {
       .limit(2),
   ]);
 
-  // Keep the two rails disjoint so no product photo appears twice on the page:
-  // the featured rail drops anything already shown under new arrivals.
   const newArrivalsShown = newArrivals.slice(0, 4);
   const newArrivalIds = new Set(newArrivalsShown.map((p) => p.id));
   const featuredShown = featured.filter((p) => !newArrivalIds.has(p.id)).slice(0, 4);
@@ -58,12 +56,10 @@ export default async function HomePage() {
         ) : null}
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent pointer-events-none" />
         <div className="wrap relative flex h-full flex-col items-center justify-end pb-10 text-center text-white md:pb-16">
-          <h1 className="display rise delay-1 max-w-3xl text-2xl leading-[1.15] md:text-4xl">
+          <h1 className="display rise delay-1 max-w-3xl text-lg leading-[1.15] md:text-3xl">
             {pick(locale, hero?.heading, hero?.headingFr)}
           </h1>
-          <p className="rise delay-2 mt-5 max-w-xl text-sm leading-relaxed text-white/85 md:text-base italic">
-            {pick(locale, hero?.body, hero?.bodyFr)}
-          </p>
+
           <div className="rise delay-3 mt-8 flex flex-wrap items-center justify-center gap-3">
             <Link href={hero?.ctaHref ?? "/shop"} className="btn btn-primary bg-white text-ink hover:bg-accent hover:text-white">
               {pick(locale, hero?.ctaLabel, hero?.ctaLabelFr)}
@@ -72,23 +68,6 @@ export default async function HomePage() {
               {t(locale, "home.bookCta")}
             </Link>
           </div>
-        </div>
-      </section>
-
-      {/* Service strip */}
-      <section className="border-b border-line bg-paper">
-        <div className="wrap grid gap-6 pb-12 pt-5 text-center md:grid-cols-4">
-          {[
-            [t(locale, "home.svc1"), t(locale, "home.svc1b")],
-            [t(locale, "home.svc2"), t(locale, "home.svc2b")],
-            [t(locale, "home.svc3"), t(locale, "home.svc3b")],
-            [t(locale, "home.svc4"), t(locale, "home.svc4b")],
-          ].map(([title, sub]) => (
-            <div key={title}>
-              <p className="text-[0.8rem] tracking-[0.1em] uppercase">{title}</p>
-              <p className="mt-1 text-xs text-muted">{sub}</p>
-            </div>
-          ))}
         </div>
       </section>
 
@@ -112,7 +91,7 @@ export default async function HomePage() {
           <div className="grid md:grid-cols-2">
             <div className="relative aspect-[4/3] md:aspect-auto md:min-h-[520px]">
               {banner.imageUrl ? (
-                <Image src={banner.imageUrl} alt={banner.heading} fill sizes="50vw" quality={65} className="object-cover object-top" />
+                <Image src={banner.imageUrl} alt={banner.heading} fill sizes="50vw" quality={90} className="object-cover object-top" />
               ) : null}
             </div>
             <div className="flex flex-col justify-center gap-5 px-8 py-16 text-white md:px-16">
@@ -183,15 +162,26 @@ export default async function HomePage() {
         <div className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-3">
           {looks.map((look, index) => (
             <figure key={look.id} className={index === 0 ? "col-span-2 md:col-span-1" : ""}>
-              <div className="photo-frame relative aspect-[3/4] zoom-parent">
-                <Image
-                  src={look.imageUrl}
-                  alt={look.title}
-                  fill
-                  sizes="(min-width: 768px) 33vw, 50vw"
-                  quality={65} className="object-cover object-top"
+              {look.mediaType === "video" ? (
+                <LookbookVideo
+                  src={look.videoUrl ?? look.imageUrl}
+                  poster={look.posterUrl}
+                  title={look.title}
+                  caption={pick(locale, look.caption, look.captionFr)}
+                  durationSeconds={look.durationSeconds}
+                  className="photo-frame aspect-[3/4]"
                 />
-              </div>
+              ) : (
+                <div className="photo-frame relative aspect-[3/4] zoom-parent">
+                  <Image
+                    src={look.imageUrl}
+                    alt={look.title}
+                    fill
+                    sizes="(min-width: 768px) 33vw, 50vw"
+                    quality={65} className="object-cover object-top"
+                  />
+                </div>
+              )}
               <figcaption className="mt-2 text-xs text-muted">{pick(locale, look.caption, look.captionFr)}</figcaption>
             </figure>
           ))}
@@ -235,6 +225,24 @@ export default async function HomePage() {
               </div>
             ) : null}
           </div>
+        </div>
+      </section>
+
+      {/* Bottom-of-page contact CTA */}
+      <section className="bg-[#1a1a1a] py-10">
+        <div className="wrap flex flex-col items-center justify-center gap-3 text-center">
+          <p className="text-sm text-white/90">
+            Need help finding the right piece, or want to write us a message? We are here for you.
+          </p>
+          <Link href="/contact" className="btn bg-white text-ink hover:bg-accent hover:text-white">
+            Get in touch
+          </Link>
+          <p className="text-xs text-white/50">
+            Or write to us directly at{" "}
+            <a href="mailto:info@osszcollection.com" className="text-accent hover:text-white hover:underline">
+              info@osszcollection.com
+            </a>
+          </p>
         </div>
       </section>
     </>

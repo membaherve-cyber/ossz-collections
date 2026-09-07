@@ -38,7 +38,7 @@ import {
   listDeliveryZones,
 } from "@/lib/store";
 import { makeOrderNumber, makeReference } from "@/lib/utils";
-import { notifyAppointment, notifyOrderPlaced, sendEmail } from "@/lib/notify";
+import { notifyAppointment, notifyOrderPlaced, sendEmail, queueWhatsApp } from "@/lib/notify";
 
 export type ActionState = { ok: boolean; message: string; redirectTo?: string };
 
@@ -296,8 +296,11 @@ export async function placeOrderAction(
   const createAccount = formData.get("createAccount") === "on";
   const password = String(formData.get("password") ?? "");
 
-  if (!email || !phone || !customerName) {
-    return { ok: false, message: "Please give us a name, an email and a phone number." };
+  if (!customerName) {
+    return { ok: false, message: "Please provide your name." };
+  }
+  if (!email && !phone) {
+    return { ok: false, message: "Please provide either an email address or a phone number so we can reach you." };
   }
 
   const zones = await listDeliveryZones();
@@ -498,8 +501,62 @@ export async function contactAction(_prev: ActionState, formData: FormData): Pro
   if (!name || !contact || !message) {
     return { ok: false, message: "Please complete every field so we can reply." };
   }
-  await db.insert(contactMessages).values({ name, contact, message });
+
+  const inserted = await db.insert(contactMessages).values({ name, contact, message }).returning();
+  const row = inserted[0];
+
+  // Forward to OSSZ team email
+  await sendEmail({
+    to: "info@osszcollection.com",
+    subject: `New message from ${name} — ${contact}`,
+    body: `New customer message received.\n\nName: ${name}\nContact: ${contact}\nMessage:\n${message}\n\nReply in the backoffice: https://osszcollections.cm/admin/contact`,
+    appointmentId: null,
+    orderId: row.id,
+  });
+
   return { ok: true, message: "Thank you for writing to us. We reply within one business day." };
+}
+
+export async function sendMessageReplyAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const messageId = Number(formData.get("messageId") ?? "0");
+  const reply = String(formData.get("reply") ?? "").trim();
+
+  if (!messageId || !reply) {
+    return { ok: false, message: "Please select a message and write a reply." };
+  }
+
+  const msg = (
+    await db.select().from(contactMessages).where(eq(contactMessages.id, messageId)).limit(1)
+  )[0];
+  if (!msg) {
+    return { ok: false, message: "That message could not be found." };
+  }
+
+  // Mark as handled
+  await db.update(contactMessages).set({ handled: true }).where(eq(contactMessages.id, messageId));
+
+  // Send reply via email if contact has email
+  if (msg.contact.includes("@")) {
+    await sendEmail({
+      to: msg.contact,
+      subject: `OSSZ Collections — regarding your message`,
+      body: `Dear ${msg.name},\n\nThank you for reaching out to OSSZ Collections.\n\n${reply}\n\nWith warm regards,\nOSSZ Collections\nAnge Raphael, Douala, Cameroon\n\nhttps://osszcollections.cm`,
+      orderId: null,
+      appointmentId: null,
+    });
+  }
+
+  // Queue WhatsApp message for staff to send if phone number
+  if (msg.contact.replace(/\D/g, "").length >= 7) {
+    await queueWhatsApp({
+      to: msg.contact,
+      body: `Hello ${msg.name}, thank you for your message. ${reply}`,
+      orderId: null,
+      appointmentId: null,
+    });
+  }
+
+  return { ok: true, message: `Your reply has been sent to ${msg.name}.` };
 }
 
 /* --------------------------- Order lookup --------------------------- */

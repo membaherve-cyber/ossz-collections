@@ -64,6 +64,9 @@ export function HeaderNav({
           <span className="mt-[6px] block h-px w-6 bg-ink" />
           <span className="mt-[6px] block h-px w-4 bg-ink" />
         </button>
+        <Link href="/" aria-label="OSSZ Collections" className="md:hidden relative inline-block shrink-0">
+          <img src="/logo-ossz.png" alt="OSSZ Collections" className="h-7 w-auto" style={{height: '28px', width: 'auto'}} />
+        </Link>
 
         <nav className="hidden md:flex items-center gap-7 text-[0.78rem] tracking-[0.14em] uppercase">
           {LINKS.slice(0, 3).map((link) => (

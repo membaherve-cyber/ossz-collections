@@ -9,7 +9,8 @@
     "typecheck": "tsc --noEmit",
     "db:push": "drizzle-kit push --config=drizzle.config.ts",
     "db:setup": "node scripts/db-setup.mjs",
-    "prebuild": "node scripts/restore-catalogue-images.mjs"
+    "prebuild": "node scripts/ensure-upload-dirs.mjs && node scripts/restore-catalogue-images.mjs",
+    "predev": "node scripts/ensure-upload-dirs.mjs"
   },
   "dependencies": {
     "dotenv": "17.3.1",

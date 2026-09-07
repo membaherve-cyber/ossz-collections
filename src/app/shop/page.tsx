@@ -92,6 +92,21 @@ export default async function ShopPage({
         <h1 className="display mt-2 text-4xl md:text-5xl">{t(locale, "shop.title")}</h1>
       </header>
 
+      {/* Service strip — the same reassurances shown on the homepage. */}
+      <section className="mt-8 grid gap-6 border-y border-line py-6 text-center sm:grid-cols-2 md:grid-cols-4">
+        {[
+          [t(locale, "home.svc1"), t(locale, "home.svc1b")],
+          [t(locale, "home.svc2"), t(locale, "home.svc2b")],
+          [t(locale, "home.svc3"), t(locale, "home.svc3b")],
+          [t(locale, "home.svc4"), t(locale, "home.svc4b")],
+        ].map(([title, sub]) => (
+          <div key={title}>
+            <p className="text-[0.8rem] tracking-[0.1em] uppercase">{title}</p>
+            <p className="mt-1 text-xs text-muted">{sub}</p>
+          </div>
+        ))}
+      </section>
+
       <div className="mt-8 max-w-2xl">
         <ShopSearch
           initialQ={filters.q}
