@@ -1,0 +1,25 @@
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.100.18:3000
+- Environments: .env
+✓ Ready in 508ms
+
+○ Compiling / ...
+ GET / 200 in 10.5s (next.js: 5.2s, application-code: 5.3s)
+ GET / 200 in 2.6s (next.js: 11ms, application-code: 2.6s)
+ GET / 200 in 2.5s (next.js: 9ms, application-code: 2.5s)
+ GET / 200 in 2.3s (next.js: 7ms, application-code: 2.3s)
+ GET /catalogue/editorial-hero.jpg 200 in 3.7s (next.js: 1307ms, application-code: 2.4s)
+ GET /catalogue/noir-editorial-1.jpg 200 in 4.1s (next.js: 1213ms, application-code: 2.9s)
+ GET /catalogue/editorial-hero.jpg 200 in 4.1s (next.js: 1217ms, application-code: 2.9s)
+ GET /catalogue/noir-editorial-1.jpg 200 in 3.7s (next.js: 813ms, application-code: 2.9s)
+ GET /catalogue/midnight-column-1.jpg 200 in 4.1s (next.js: 1219ms, application-code: 2.9s)
+ GET /catalogue/midnight-column-1.jpg 200 in 4.0s (next.js: 1051ms, application-code: 2.9s)
+ GET / 200 in 690ms (next.js: 8ms, application-code: 682ms)
+ GET /catalogue/olive-safari-set-1.jpg 200 in 1070ms (next.js: 44ms, application-code: 1025ms)
+ GET /catalogue/amber-heritage-look-1.jpg 200 in 1074ms (next.js: 31ms, application-code: 1043ms)
+ GET /offline 200 in 1418ms (next.js: 585ms, application-code: 833ms)
+ GET / 200 in 1450ms (next.js: 18ms, application-code: 1432ms)
+ GET / 200 in 2.2s (next.js: 17ms, application-code: 2.2s)
+ GET / 200 in 3.5s (next.js: 6ms, application-code: 3.5s)
+ GET / 200 in 637ms (next.js: 9ms, application-code: 628ms)

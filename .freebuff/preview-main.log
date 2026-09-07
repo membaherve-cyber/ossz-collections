@@ -1,0 +1,16 @@
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:59463
+- Network:       http://192.168.100.18:59463
+- Environments: .env
+✓ Ready in 744ms
+
+ GET / 200 in 4.6s (next.js: 254ms, application-code: 4.4s)
+ GET / 200 in 2.8s (next.js: 11ms, application-code: 2.8s)
+ GET /catalogue/editorial-hero.jpg 200 in 4.0s (next.js: 1979ms, application-code: 2.0s)
+ GET /catalogue/noir-editorial-1.jpg 200 in 4.5s (next.js: 2.0s, application-code: 2.5s)
+ GET /catalogue/amber-heritage-look-1.jpg 200 in 4.2s (next.js: 1601ms, application-code: 2.6s)
+ GET /catalogue/olive-safari-set-1.jpg 200 in 4.4s (next.js: 1602ms, application-code: 2.8s)
+ GET /catalogue/midnight-column-1.jpg 200 in 5.6s (next.js: 2.0s, application-code: 3.6s)
+ GET / 200 in 3.7s (next.js: 6ms, application-code: 3.7s)
+ GET / 200 in 643ms (next.js: 10ms, application-code: 633ms)
+[?25h

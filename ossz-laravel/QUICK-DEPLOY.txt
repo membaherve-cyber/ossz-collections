@@ -1,0 +1,248 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║              OSSZ COLLECTIONS - NAMECHEAP DEPLOYMENT GUIDE                  ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+Your cPanel Credentials:
+────────────────────────
+URL:      https://osszcollection.com:2083
+Username: YOUR_CPANEL_USERNAME
+Password: YOUR_CPANEL_PASSWORD
+
+IMPORTANT: The deploy ZIP is ~69KB because it contains ONLY our custom code.
+The full Laravel framework (~80MB) is installed on the server via Composer
+in Step 4 below. This is the standard, correct approach.
+
+══════════════════════════════════════════════════════════════════════════════
+                              STEP-BY-STEP DEPLOYMENT
+══════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ STEP 1: LOGIN TO CPANEL                                                    │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+1. Open your browser
+2. Go to: https://osszcollection.com:2083
+3. Login with:
+   - Username: YOUR_CPANEL_USERNAME
+   - Password: YOUR_CPANEL_PASSWORD
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ STEP 2: CREATE POSTGRESQL DATABASE                                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+1. In cPanel, find "PostgreSQL Databases" (search "postgres" in search bar)
+
+2. Create Database:
+   - Database Name: osszcollection_laravel
+   - Click "Create Database"
+
+3. Create User:
+   - Username: osszcollection_user
+   - Password: Choose a strong password (save this!)
+   - Click "Create User"
+
+4. Add User to Database:
+   - Select User: osszcollection_user
+   - Select Database: osszcollection_laravel
+   - Click "Add"
+   - Check "ALL PRIVILEGES"
+   - Click "Make Changes"
+
+   ✓ Write down your database password!
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ STEP 3: UPLOAD FILES                                                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+1. In cPanel, open "File Manager"
+
+2. Navigate to: public_html/
+
+3. Upload the deployment ZIP:
+   - Click "Upload" button
+   - Select: ossz-laravel-deploy.zip (it's only ~69KB — that's correct!)
+   - Wait for upload to complete
+
+4. Extract the ZIP:
+   - Right-click on ossz-laravel-deploy.zip
+   - Click "Extract"
+   - Extract to: public_html/
+
+5. Move files to root:
+   - Open the extracted folder
+   - Select ALL files (Ctrl+A)
+   - Click "Move"
+   - Move to: /public_html/
+
+6. Delete the empty folder and ZIP file
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ STEP 4: INSTALL LARAVEL DEPENDENCIES VIA COMPOSER  ★ CRITICAL STEP ★       │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+This is where the full Laravel framework gets downloaded to the server.
+
+1. In cPanel, search for and open "Terminal"
+
+2. Run these commands one by one:
+
+   cd ~/public_html
+
+   # Install Composer dependencies (this downloads Laravel + Livewire + all
+   # packages — takes 1-3 minutes, results in ~80MB vendor/ directory)
+   composer install --optimize-autoloader --no-dev
+
+   # Verify composer worked (you should see "Guzzlehttp/Guzzle" in the list)
+   composer show | head -5
+
+3. If "composer" command is not found, try:
+   php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+   php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+   rm composer-setup.php
+   composer install --optimize-autoloader --no-dev
+
+⚠️ DO NOT SKIP THIS STEP. Without Composer, artisan and the entire app
+   will not work. The 69KB ZIP + this step = fully functional Laravel app.
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ STEP 5: SET DOCUMENT ROOT                                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+1. In cPanel, go to "Domains"
+
+2. Find osszcollection.com and click "Manage"
+
+3. Set Document Root to:
+   public_html/public
+
+4. Click "Change" to save
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ STEP 6: CONFIGURE ENVIRONMENT FILE                                         │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+1. In File Manager, navigate to: public_html/
+
+2. Find .env file and click "Edit"
+
+3. Replace the ENTIRE content with this (update PASSWORD):
+
+APP_NAME="OSSZ Collections"
+APP_ENV=production
+APP_KEY=
+APP_DEBUG=false
+APP_URL=https://osszcollection.com
+
+LOG_CHANNEL=stack
+LOG_LEVEL=error
+
+DB_CONNECTION=pgsql
+DB_HOST=localhost
+DB_PORT=5432
+DB_DATABASE=osszcollection_laravel
+DB_USERNAME=osszcollection_user
+DB_PASSWORD=YOUR_PASSWORD_HERE
+
+SESSION_DRIVER=database
+SESSION_LIFETIME=120
+CACHE_STORE=database
+
+GEMINI_API_KEY=YOUR_GEMINI_API_KEY_HERE
+GEMINI_API_KEY2=YOUR_SECOND_API_KEY_HERE
+
+WHATSAPP_NUMBER=+YOUR_WHATSAPP_NUMBER
+CONTACT_EMAIL=info@osszcollection.com
+
+4. Click "Save Changes"
+
+⚠️ IMPORTANT: Replace YOUR_PASSWORD_HERE with the database password you created!
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ STEP 7: RUN ARTISAN COMMANDS                                                │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+In cPanel Terminal (you should still be there from Step 4):
+
+cd ~/public_html
+
+php artisan key:generate
+php artisan migrate --force
+php artisan db:seed --force
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+chmod -R 775 storage
+chmod -R 775 bootstrap/cache
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ STEP 8: SETUP SSL CERTIFICATE                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+1. In cPanel, go to "SSL/TLS Status"
+
+2. Find osszcollection.com
+
+3. Click "Run AutoSSL"
+
+4. Wait for the certificate (1-5 minutes)
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ STEP 9: SETUP CRON JOB (Optional but recommended)                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+1. In cPanel, go to "Cron Jobs"
+
+2. Add New Cron Job:
+   - Common Settings: Every minute
+   - Command: * * * * * cd ~/public_html && php artisan schedule:run >> /dev/null 2>&1
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ STEP 10: TEST YOUR DEPLOYMENT                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+1. Visit: https://osszcollection.com
+   - You should see the OSSZ homepage
+
+2. Visit: https://osszcollection.com/login
+   - Login with:
+     Email: admin@osszcollection.com
+     Password: password
+
+3. Visit: https://osszcollection.com/admin
+   - You should see the backoffice dashboard
+
+⚠️ Change the default admin password after first login!
+
+══════════════════════════════════════════════════════════════════════════════
+                              TROUBLESHOOTING
+══════════════════════════════════════════════════════════════════════════════
+
+500 error:
+• Check .env has correct database credentials
+• Run: php artisan key:generate
+• Run: chmod -R 775 storage
+
+"composer: command not found":
+• php -r "copy('https://getcomposer.org/installer', 'c.php');"
+• php c.php
+• mv composer.phar /usr/local/bin/composer
+
+Database connection fails:
+• Verify database name, username, and password in .env
+• Make sure you granted ALL PRIVILEGES to the user
+
+Pages don't load:
+• Verify Document Root is set to public_html/public
+• Check .htaccess exists in public/ folder
+
+                           DEPLOYMENT COMPLETE!
+══════════════════════════════════════════════════════════════════════════════
+
+Your OSSZ Collections website is now live at:
+🌐 https://osszcollection.com
+
+Backoffice:
+🔐 https://osszcollection.com/admin
+   Email: admin@osszcollection.com
+   Password: password
+

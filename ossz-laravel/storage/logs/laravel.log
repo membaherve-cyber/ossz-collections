@@ -1,0 +1,14 @@
+[2026-09-06 22:59:47] production.ERROR: The C:\Users\herve\Documents\FreeBuff Project\ossz-collections-e-commerce-specification-main\ossz-laravel\bootstrap\cache directory must be present and writable. {"exception":"[object] (Exception(code: 0): The C:\\Users\\herve\\Documents\\FreeBuff Project\\ossz-collections-e-commerce-specification-main\\ossz-laravel\\bootstrap\\cache directory must be present and writable. at C:/Users/herve/Documents/FreeBuff Project/ossz-collections-e-commerce-specification-main/ossz-laravel/vendor/laravel/framework/src/Illuminate/Foundation/PackageManifest.php:179)
+[stacktrace]
+#0 C:/Users/herve/Documents/FreeBuff Project/ossz-collections-e-commerce-specification-main/ossz-laravel/vendor/laravel/framework/src/Illuminate/Foundation/PackageManifest.php(132): Illuminate/Foundation/PackageManifest->write()
+#1 C:/Users/herve/Documents/FreeBuff Project/ossz-collections-e-commerce-specification-main/ossz-laravel/vendor/laravel/framework/src/Illuminate/Foundation/PackageManifest.php(108): Illuminate/Foundation/PackageManifest->build()
+#2 C:/Users/herve/Documents/FreeBuff Project/ossz-collections-e-commerce-specification-main/ossz-laravel/vendor/laravel/framework/src/Illuminate/Foundation/PackageManifest.php(91): Illuminate/Foundation/PackageManifest->getManifest()
+#3 C:/Users/herve/Documents/FreeBuff Project/ossz-collections-e-commerce-specification-main/ossz-laravel/vendor/laravel/framework/src/Illuminate/Foundation/PackageManifest.php(80): Illuminate/Foundation/PackageManifest->config()
+#4 C:/Users/herve/Documents/FreeBuff Project/ossz-collections-e-commerce-specification-main/ossz-laravel/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/RegisterFacades.php(26): Illuminate/Foundation/PackageManifest->aliases()
+#5 C:/Users/herve/Documents/FreeBuff Project/ossz-collections-e-commerce-specification-main/ossz-laravel/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(342): Illuminate/Foundation/Bootstrap/RegisterFacades->bootstrap()
+#6 C:/Users/herve/Documents/FreeBuff Project/ossz-collections-e-commerce-specification-main/ossz-laravel/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(474): Illuminate/Foundation/Application->bootstrapWith()
+#7 C:/Users/herve/Documents/FreeBuff Project/ossz-collections-e-commerce-specification-main/ossz-laravel/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(196): Illuminate/Foundation/Console/Kernel->bootstrap()
+#8 C:/Users/herve/Documents/FreeBuff Project/ossz-collections-e-commerce-specification-main/ossz-laravel/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1235): Illuminate/Foundation/Console/Kernel->handle()
+#9 C:/Users/herve/Documents/FreeBuff Project/ossz-collections-e-commerce-specification-main/ossz-laravel/artisan(11): Illuminate/Foundation/Application->handleCommand()
+#10 {main}
+"} 

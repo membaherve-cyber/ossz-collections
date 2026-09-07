@@ -1,0 +1,25 @@
+{
+  "name": "OSSZ Collections",
+  "short_name": "OSSZ",
+  "description": "Contemporary fashion house rooted in Douala, Cameroon.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#faf8f5",
+  "theme_color": "#1b1917",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["shopping", "lifestyle"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Shop", "url": "/shop", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Cart", "url": "/cart" },
+    { "name": "Track an order", "url": "/order-lookup" },
+    { "name": "Book an appointment", "url": "/appointments" }
+  ]
+}
