@@ -25,6 +25,9 @@ yarn-error.log*
 /coverage
 *.tsbuildinfo
 
+# user uploads — never commit
+/public/uploads/
+
 # preview tooling
 .freebuff/
 .php-lint/
