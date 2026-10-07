@@ -291,8 +291,17 @@ async function main() {
       await c.query("update collections set cover_image=$1 where slug=$2", [url, slug]);
     }
 
-    // Journal cards are text-only, so no photograph is repeated there.
+    // Journal covers — one dedicated photograph per article.
+    const JOURNAL_COVERS = {
+      "inside-the-akwa-atelier": "/catalogue/journal-atelier.png",
+      "inside-our-ange-raphael-atelier": "/catalogue/journal-atelier.png",
+      "how-to-wear-silk-in-the-humidity": "/catalogue/journal-silk-humidity.jpg",
+      "a-guide-to-your-first-fitting": "/catalogue/journal-first-fitting.png",
+    };
     await c.query("update journal_posts set cover_image=''");
+    for (const [slug, url] of Object.entries(JOURNAL_COVERS)) {
+      await c.query("update journal_posts set cover_image=$1 where slug=$2", [url, slug]);
+    }
 
     await c.query("commit");
     console.log(`products: ${made}, images: ${imgs}`);
