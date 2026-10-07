@@ -33,7 +33,7 @@ export default async function JournalPostPage({ params }: { params: Promise<{ sl
       <p className="mt-4 text-lg leading-relaxed text-ink-soft">{pick(locale, post.excerpt, post.excerptFr)}</p>
       {post.coverImage ? (
         <div className="relative mt-8 aspect-[16/9] overflow-hidden bg-accent-soft">
-          <Image src={post.coverImage} alt={title} fill priority sizes="100vw" quality={65} className="object-cover object-top" />
+          <Image src={post.coverImage} alt={title} fill priority sizes="(min-width:768px) 768px, 100vw" quality={90} className="object-cover object-top" />
         </div>
       ) : null}
       <div className="prose-osz mt-10">

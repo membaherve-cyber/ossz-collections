@@ -205,7 +205,7 @@ export default async function HomePage() {
               <Link key={post.id} href={`/journal/${post.slug}`} className="card flex gap-4 p-4 hover:border-ink">
                 <div className="photo-frame photo-frame-sm relative h-24 w-24 shrink-0">
                   {post.coverImage ? (
-                    <Image src={post.coverImage} alt={post.title} fill sizes="96px" quality={65} className="object-cover object-top" />
+                    <Image src={post.coverImage} alt={post.title} fill sizes="96px" quality={90} className="object-cover object-top" />
                   ) : null}
                 </div>
                 <div>

@@ -28,7 +28,7 @@ export default async function JournalPage() {
             <Link href={`/journal/${post.slug}`} className="group block zoom-parent">
               <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-accent-soft">
                 {post.coverImage ? (
-                  <Image src={post.coverImage} alt={post.title} fill sizes="33vw" quality={65} className="object-cover object-top" />
+                  <Image src={post.coverImage} alt={post.title} fill sizes="(min-width:768px) 33vw, 100vw" quality={90} className="object-cover object-top" />
                 ) : (
                   <span className="display text-3xl tracking-[0.22em] uppercase text-ink/25">
                     OSSZ
