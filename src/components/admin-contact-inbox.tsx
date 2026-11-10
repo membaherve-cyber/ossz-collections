@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import Link from "next/link";
+import { formatDateTime } from "@/lib/utils";
 
 type Message = {
   id: number;
@@ -25,138 +25,208 @@ export function AdminContactInbox({
   lastReplyOk,
   lastReplyError,
 }: Props) {
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedId, setSelectedId] = useState<number | null>(messages[0]?.id ?? null);
+  const [subject, setSubject] = useState("Re: Regarding your message to OSSZ Collections");
   const [replyText, setReplyText] = useState("");
   const [sending, setSending] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [statusMessage, setStatusMessage] = useState<{ ok: boolean; text: string } | null>(
+    lastReplyOk
+      ? { ok: true, text: "Reply successfully sent and logged!" }
+      : lastReplyError
+      ? { ok: false, text: "Error sending reply. Please try again." }
+      : null
+  );
 
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const selected = messages.find((m) => m.id === selectedId);
 
-  function sendReply() {
+  async function handleSendReply(e: React.FormEvent) {
+    e.preventDefault();
     if (!selectedId || !replyText.trim()) return;
+
     setSending(true);
-    // Use a hidden form to post to the message endpoint
-    const form = document.createElement("form");
-    form.method = "POST";
-    form.action = "/api/contact-reply";
-    const idInput = document.createElement("input");
-    idInput.type = "hidden";
-    idInput.name = "messageId";
-    idInput.value = String(selectedId);
-    const replyInput = document.createElement("input");
-    replyInput.type = "hidden";
-    replyInput.name = "reply";
-    replyInput.value = replyText;
-    form.appendChild(idInput);
-    form.appendChild(replyInput);
-    document.body.appendChild(form);
-    form.addEventListener("submit", () => setSending(false));
-    form.submit();
+    setStatusMessage(null);
+
+    const formData = new FormData();
+    formData.append("messageId", String(selectedId));
+    formData.append("subject", subject);
+    formData.append("reply", replyText);
+
+    try {
+      const res = await fetch("/api/contact-reply", {
+        method: "POST",
+        headers: { Accept: "application/json" },
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        throw new Error(data.error || "Failed to send response.");
+      }
+
+      setStatusMessage({
+        ok: true,
+        text: `Reply sent successfully to ${selected?.contact}!`,
+      });
+      setReplyText("");
+      // Mark local message as handled
+      if (selected) {
+        selected.handled = true;
+      }
+    } catch (err: unknown) {
+      setStatusMessage({
+        ok: false,
+        text: err instanceof Error ? err.message : "Error sending reply.",
+      });
+    } finally {
+      setSending(false);
+    }
   }
 
-  // Auto-focus textarea when a message is selected
-  useState(() => {
-    if (selectedId && textareaRef.current) {
-      textareaRef.current.focus();
-    }
-  });
-
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
+    <div className="grid gap-6 lg:grid-cols-[1fr_420px]">
       {/* Message list */}
-      <div className="card overflow-hidden">
-        <div className="h-96 overflow-y-auto space-y-2 p-3">
-          {messages.map((m) => (
-            <button
-              key={m.id}
-              type="button"
-              onClick={() => {
-                setSelectedId(m.id);
-                setReplyText("");
-              }}
-              className={`w-full text-left border rounded-lg p-4 transition-colors text-sm ${
-                selectedId === m.id
-                  ? "border-ink bg-paper"
-                  : "border-transparent hover:bg-accent-soft/30"
-              }`}
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-ink">{m.name}</span>
-                    <span className="text-xs text-muted">
-                      {new Date(m.createdAt).toLocaleString()}
-                    </span>
+      <div className="card rounded-2xl overflow-hidden bg-paper border border-line shadow-xs">
+        <div className="p-4 border-b border-line bg-canvas/30 flex items-center justify-between">
+          <span className="text-xs font-semibold uppercase tracking-wider text-muted">
+            Customer Inquiries ({messages.length})
+          </span>
+          <span className="text-xs text-muted">
+            {messages.filter((m) => !m.handled).length} unread
+          </span>
+        </div>
+
+        <div className="max-h-[600px] overflow-y-auto divide-y divide-line/60">
+          {messages.length === 0 ? (
+            <div className="p-8 text-center text-sm text-muted">No messages received yet.</div>
+          ) : (
+            messages.map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => {
+                  setSelectedId(m.id);
+                  setSubject(`Re: Regarding inquiry from ${m.name}`);
+                  setStatusMessage(null);
+                }}
+                className={`w-full text-left p-4 transition-all ${
+                  selectedId === m.id
+                    ? "bg-accent-soft/50 border-l-4 border-accent"
+                    : "hover:bg-canvas/50"
+                }`}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-sm text-ink">{m.name}</span>
+                      {!m.handled ? (
+                        <span className="rounded-full bg-accent text-white px-2 py-0.2 text-[10px] uppercase tracking-wider font-semibold">
+                          New
+                        </span>
+                      ) : null}
+                    </div>
+                    <p className="text-xs text-ink-soft mt-0.5 font-mono">{m.contact}</p>
                   </div>
-                  <p className="text-xs text-ink-soft mt-0.5 break-all">{m.contact}</p>
-                </div>
-                {!m.handled && (
-                  <span className="text-xs text-accent font-medium flex-shrink-0">
-                    New
+                  <span className="text-[11px] text-muted shrink-0">
+                    {formatDateTime(m.createdAt)}
                   </span>
-                )}
-              </div>
-              <p className="mt-2 text-xs text-ink-soft leading-relaxed line-clamp-2">
-                {m.message}
-              </p>
-            </button>
-          ))}
+                </div>
+                <p className="mt-2 text-xs text-ink-soft line-clamp-2 leading-relaxed">
+                  {m.message}
+                </p>
+              </button>
+            ))
+          )}
         </div>
       </div>
 
-      {/* Reply panel */}
-      <div className="card p-5 flex flex-col">
+      {/* Reply Workspace Panel */}
+      <div className="card rounded-2xl p-6 bg-paper border border-line shadow-xs flex flex-col justify-between">
         {selected ? (
-          <>
-            <div className="mb-5">
-              <h3 className="font-medium text-ink">{selected.name}</h3>
-              <p className="text-sm text-ink-soft">{selected.contact}</p>
+          <form onSubmit={handleSendReply} className="space-y-4">
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="eyebrow">Customer Details</span>
+                {selected.handled ? (
+                  <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                    Handled
+                  </span>
+                ) : (
+                  <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
+                    Awaiting Response
+                  </span>
+                )}
+              </div>
+              <h3 className="display text-xl mt-1 text-ink">{selected.name}</h3>
+              <p className="text-xs font-mono text-ink-soft mt-0.5">{selected.contact}</p>
             </div>
 
-            <div className="rounded-lg border border-line bg-paper p-4 mb-5 text-sm flex-1">
-              <p className="text-ink-soft leading-relaxed whitespace-pre-wrap">{selected.message}</p>
+            {/* Original message view */}
+            <div>
+              <label className="text-xs font-medium text-muted uppercase tracking-wider block mb-1.5">
+                Original Message
+              </label>
+              <div className="rounded-xl border border-line bg-canvas/40 p-3.5 text-xs text-ink leading-relaxed whitespace-pre-wrap max-h-44 overflow-y-auto">
+                {selected.message}
+              </div>
             </div>
 
-            <h4 className="text-sm font-medium text-ink mb-2">Your reply</h4>
-            <textarea
-              ref={textareaRef}
-              value={replyText}
-              onChange={(e) => setReplyText(e.target.value)}
-              rows={6}
-              className="field resize-none"
-              placeholder="Type your reply here…"
-            />
+            {/* Subject */}
+            <div>
+              <label className="label" htmlFor="reply-subject">Subject</label>
+              <input
+                id="reply-subject"
+                type="text"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                className="field text-xs"
+                required
+              />
+            </div>
 
-            {lastReplyOk && lastReplyMessageId === String(selectedId) && (
-              <p className="mt-3 text-xs text-accent">Reply sent successfully.</p>
-            )}
-            {lastReplyError && lastReplyMessageId === String(selectedId) && (
-              <p className="mt-3 text-xs text-red-600">Failed to send. Please try again.</p>
-            )}
+            {/* Reply textarea */}
+            <div>
+              <label className="label" htmlFor="reply-body">Compose Response</label>
+              <textarea
+                id="reply-body"
+                ref={textareaRef}
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                rows={5}
+                required
+                className="field text-xs resize-none"
+                placeholder={`Write your response to ${selected.name}…`}
+              />
+            </div>
 
-            <button
-              onClick={sendReply}
-              className="btn btn-primary mt-3"
-              disabled={sending || !replyText.trim()}
-            >
-              {sending ? "Sending…" : "Send reply"}
-            </button>
+            {statusMessage ? (
+              <div
+                className={`p-3 rounded-xl text-xs ${
+                  statusMessage.ok
+                    ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                    : "bg-red-50 text-red-700 border border-red-200"
+                }`}
+              >
+                {statusMessage.text}
+              </div>
+            ) : null}
 
-            <p className="mt-3 text-xs text-muted">
-              The reply will be sent via email (if available) and WhatsApp (if phone number).
-            </p>
-          </>
+            <div className="pt-2">
+              <button
+                type="submit"
+                disabled={sending || !replyText.trim()}
+                className="btn btn-primary w-full text-xs shadow-xs"
+              >
+                {sending ? "Sending Reply…" : "Send Email Response"}
+              </button>
+              <p className="text-[11px] text-muted text-center mt-2">
+                Sends through configured OSSZ SMTP mailer and logs to customer messages.
+              </p>
+            </div>
+          </form>
         ) : (
-          <div className="py-10 text-center text-sm text-muted flex-1 flex flex-col items-center justify-center gap-3">
-            <p>Select a message to read and reply to it.</p>
-            <Link
-              href="/contact"
-              className="btn btn-ghost btn-sm"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Open contact page
-            </Link>
+          <div className="flex flex-col items-center justify-center py-16 text-center text-muted text-sm">
+            Select a message to view details and reply.
           </div>
         )}
       </div>

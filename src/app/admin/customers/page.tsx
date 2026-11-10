@@ -2,7 +2,6 @@ import { desc, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { orders, users } from "@/db/schema";
 import { formatDate, formatXAF } from "@/lib/utils";
-
 import { guardPage } from "@/lib/guard";
 
 export const dynamic = "force-dynamic";
@@ -34,51 +33,101 @@ export default async function CustomersPage() {
     .groupBy(orders.guestEmail, orders.customerName, orders.guestPhone);
 
   return (
-    <div>
-      <h1 className="display text-3xl">Customers</h1>
-      <p className="mt-2 text-sm text-ink-soft">Registered accounts and guest buyers, with lifetime value.</p>
-
-      <h2 className="display mt-8 text-2xl">Accounts</h2>
-      <div className="mt-4 overflow-x-auto">
-        <table className="w-full min-w-[620px] text-sm">
-          <thead>
-            <tr className="border-b border-line text-left text-xs uppercase text-muted">
-              <th className="py-3">Name</th><th>Email</th><th>Phone</th><th>Orders</th><th>Lifetime value</th><th>Joined</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row) => (
-              <tr key={row.user.id} className="border-b border-line/60">
-                <td className="py-2">{row.user.fullName || "—"}</td>
-                <td>{row.user.email}</td>
-                <td>{row.user.phone ?? "—"}</td>
-                <td>{Number(row.orderCount)}</td>
-                <td>{formatXAF(Number(row.spend))}</td>
-                <td className="text-xs text-muted">{formatDate(row.user.createdAt)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="space-y-8">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <span className="text-xs uppercase tracking-widest text-accent font-semibold">Clients</span>
+          <h1 className="display text-3xl font-medium tracking-tight text-ink mt-0.5">Customer Database</h1>
+          <p className="mt-1 text-sm text-ink-soft">Registered client profiles and guest purchasers, ranked by lifetime value.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-paper px-3 py-1 text-xs text-ink-soft shadow-2xs">
+            <span className="h-2 w-2 rounded-full bg-accent" />
+            {rows.length} Registered · {guests.length} Guests
+          </span>
+        </div>
       </div>
 
-      <h2 className="display mt-10 text-2xl">Guest buyers</h2>
-      <div className="mt-4 overflow-x-auto">
-        <table className="w-full min-w-[520px] text-sm">
-          <thead>
-            <tr className="border-b border-line text-left text-xs uppercase text-muted">
-              <th className="py-3">Name</th><th>Email</th><th>Phone</th><th>Orders</th><th>Spend</th>
-            </tr>
-          </thead>
-          <tbody>
-            {guests.map((g) => (
-              <tr key={`${g.email}-${g.phone}`} className="border-b border-line/60">
-                <td className="py-2">{g.name}</td><td>{g.email}</td><td>{g.phone}</td>
-                <td>{Number(g.n)}</td><td>{formatXAF(Number(g.spend))}</td>
-              </tr>
-            ))}
-            {guests.length === 0 ? <tr><td className="py-3 text-muted" colSpan={5}>No guest orders yet.</td></tr> : null}
-          </tbody>
-        </table>
+      {/* Registered Accounts Section */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-base font-semibold text-ink">Registered Accounts ({rows.length})</h2>
+          <span className="text-xs text-muted">Ranked by total lifetime spend</span>
+        </div>
+        <div className="card rounded-2xl border border-line bg-paper shadow-xs overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[640px] text-left text-xs">
+              <thead className="bg-canvas/50 border-b border-line/60">
+                <tr className="text-muted uppercase text-[10px] tracking-wider font-semibold">
+                  <th className="py-3.5 px-4">Client Name</th>
+                  <th className="py-3.5 px-4">Email Address</th>
+                  <th className="py-3.5 px-4">Contact Phone</th>
+                  <th className="py-3.5 px-4 text-center">Orders</th>
+                  <th className="py-3.5 px-4">Lifetime Value</th>
+                  <th className="py-3.5 px-4 text-right">Member Since</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-line/40">
+                {rows.map((row) => (
+                  <tr key={row.user.id} className="hover:bg-canvas/40 transition-colors">
+                    <td className="py-3.5 px-4 font-medium text-ink">
+                      {row.user.fullName || "—"}
+                    </td>
+                    <td className="py-3.5 px-4 text-ink-soft">{row.user.email}</td>
+                    <td className="py-3.5 px-4 text-muted">{row.user.phone ?? "—"}</td>
+                    <td className="py-3.5 px-4 text-center font-semibold text-ink">{Number(row.orderCount)}</td>
+                    <td className="py-3.5 px-4 font-semibold text-accent">{formatXAF(Number(row.spend))}</td>
+                    <td className="py-3.5 px-4 text-right text-muted">{formatDate(row.user.createdAt)}</td>
+                  </tr>
+                ))}
+                {rows.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="py-8 text-center text-muted">No registered customer accounts yet.</td>
+                  </tr>
+                ) : null}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* Guest Buyers Section */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-base font-semibold text-ink">Guest Buyers ({guests.length})</h2>
+          <span className="text-xs text-muted">Purchased without creating an account</span>
+        </div>
+        <div className="card rounded-2xl border border-line bg-paper shadow-xs overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[560px] text-left text-xs">
+              <thead className="bg-canvas/50 border-b border-line/60">
+                <tr className="text-muted uppercase text-[10px] tracking-wider font-semibold">
+                  <th className="py-3.5 px-4">Name</th>
+                  <th className="py-3.5 px-4">Email</th>
+                  <th className="py-3.5 px-4">Phone</th>
+                  <th className="py-3.5 px-4 text-center">Orders</th>
+                  <th className="py-3.5 px-4 text-right">Total Spent</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-line/40">
+                {guests.map((g) => (
+                  <tr key={`${g.email}-${g.phone}`} className="hover:bg-canvas/40 transition-colors">
+                    <td className="py-3.5 px-4 font-medium text-ink">{g.name}</td>
+                    <td className="py-3.5 px-4 text-ink-soft">{g.email}</td>
+                    <td className="py-3.5 px-4 text-muted">{g.phone}</td>
+                    <td className="py-3.5 px-4 text-center font-semibold text-ink">{Number(g.n)}</td>
+                    <td className="py-3.5 px-4 text-right font-semibold text-ink">{formatXAF(Number(g.spend))}</td>
+                  </tr>
+                ))}
+                {guests.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-8 text-center text-muted">No guest orders recorded yet.</td>
+                  </tr>
+                ) : null}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   );

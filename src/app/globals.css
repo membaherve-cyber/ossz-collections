@@ -539,3 +539,72 @@ body {
     animation-iteration-count: 1 !important;
   }
 }
+
+
+/* ==========================================================================
+   OSSZ Back-Office Administration Dashboard Styling
+   Preserves OSSZ brand color palette: ink (#1b1917), accent (#9b5f2f),
+   canvas (#f7f7f8), paper (#ffffff), line (#e6e7ea).
+   Scoped strictly under .admin-shell to never affect the storefront.
+   ========================================================================== */
+
+.admin-shell .card {
+  border-radius: 16px;
+  border: 1px solid var(--color-line);
+  background-color: var(--color-paper);
+  box-shadow: 0 1px 3px 0 rgba(27, 25, 23, 0.04), 0 1px 2px -1px rgba(27, 25, 23, 0.03);
+  transition: box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+}
+
+.admin-shell .card:hover {
+  box-shadow: 0 4px 14px 0 rgba(27, 25, 23, 0.06);
+}
+
+.admin-shell .field {
+  border-radius: 12px;
+  border: 1px solid var(--color-line);
+  padding: 0.65rem 0.85rem;
+  font-size: 0.875rem;
+  background-color: var(--color-paper);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.admin-shell .field:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(155, 95, 47, 0.12);
+}
+
+.admin-shell .btn {
+  border-radius: 10px;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  padding: 0.65rem 1.25rem;
+  font-weight: 500;
+  transition: all 0.18s ease;
+}
+
+.admin-shell .btn-sm {
+  border-radius: 8px;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.7rem;
+}
+
+.admin-shell table th {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-muted);
+  font-weight: 600;
+  padding: 0.75rem 1rem;
+}
+
+.admin-shell table td {
+  padding: 0.85rem 1rem;
+  font-size: 0.825rem;
+  border-bottom: 1px solid var(--color-line);
+}
+
+.admin-shell table tr:hover td {
+  background-color: rgba(247, 247, 248, 0.6);
+}

@@ -1,3 +1,4 @@
+import nodemailer from "nodemailer";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { notifications, orders, orderItems } from "@/db/schema";
@@ -38,7 +39,7 @@ async function record(row: {
   });
 }
 
-/** Sends through Resend when RESEND_API_KEY is present; queues otherwise. */
+/** Sends through SMTP (Namecheap / cPanel) or Resend when configured; queues otherwise. */
 export async function sendEmail(opts: {
   to: string;
   subject: string;
@@ -46,40 +47,96 @@ export async function sendEmail(opts: {
   orderId?: number | null;
   appointmentId?: number | null;
 }) {
-  const key = process.env.RESEND_API_KEY;
-  if (!key) {
-    await record({ ...opts, recipient: opts.to, channel: "email", status: "queued" });
-    return { ok: false, queued: true };
-  }
-  try {
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
-      body: JSON.stringify({
-        from: process.env.RESEND_FROM || "OSSZ Collections <hello@osszcollections.cm>",
-        to: [opts.to],
+  const smtpHost = process.env.SMTP_HOST || process.env.MAIL_HOST;
+  const smtpUser = process.env.SMTP_USER || process.env.MAIL_USERNAME;
+  const smtpPass = process.env.SMTP_PASS || process.env.MAIL_PASSWORD;
+  const smtpPort = Number(process.env.SMTP_PORT || process.env.MAIL_PORT || 465);
+  const smtpSecure =
+    process.env.SMTP_SECURE === "true" ||
+    process.env.MAIL_ENCRYPTION === "ssl" ||
+    smtpPort === 465;
+  const smtpFrom =
+    process.env.SMTP_FROM ||
+    process.env.MAIL_FROM_ADDRESS ||
+    "OSSZ Collections <contact@osszcollections.cm>";
+
+  // 1. Prioritize SMTP if credentials provided (e.g. Namecheap Stellar Plus)
+  if (smtpHost && smtpUser && smtpPass) {
+    try {
+      const transporter = nodemailer.createTransport({
+        host: smtpHost,
+        port: smtpPort,
+        secure: smtpSecure,
+        auth: {
+          user: smtpUser,
+          pass: smtpPass,
+        },
+      });
+
+      await transporter.sendMail({
+        from: smtpFrom,
+        to: opts.to,
         subject: opts.subject,
         text: opts.body,
-      }),
-    });
-    await record({
-      ...opts,
-      recipient: opts.to,
-      channel: "email",
-      status: res.ok ? "sent" : "failed",
-      error: res.ok ? "" : `HTTP ${res.status}`,
-    });
-    return { ok: res.ok, queued: false };
-  } catch (error) {
-    await record({
-      ...opts,
-      recipient: opts.to,
-      channel: "email",
-      status: "failed",
-      error: String(error).slice(0, 200),
-    });
-    return { ok: false, queued: false };
+      });
+
+      await record({
+        ...opts,
+        recipient: opts.to,
+        channel: "email",
+        status: "sent",
+        error: "",
+      });
+      return { ok: true, queued: false };
+    } catch (error) {
+      await record({
+        ...opts,
+        recipient: opts.to,
+        channel: "email",
+        status: "failed",
+        error: String(error).slice(0, 200),
+      });
+      return { ok: false, queued: false };
+    }
   }
+
+  // 2. Resend API fallback
+  const key = process.env.RESEND_API_KEY;
+  if (key) {
+    try {
+      const res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
+        body: JSON.stringify({
+          from: process.env.RESEND_FROM || "OSSZ Collections <hello@osszcollections.cm>",
+          to: [opts.to],
+          subject: opts.subject,
+          text: opts.body,
+        }),
+      });
+      await record({
+        ...opts,
+        recipient: opts.to,
+        channel: "email",
+        status: res.ok ? "sent" : "failed",
+        error: res.ok ? "" : `HTTP ${res.status}`,
+      });
+      return { ok: res.ok, queued: false };
+    } catch (error) {
+      await record({
+        ...opts,
+        recipient: opts.to,
+        channel: "email",
+        status: "failed",
+        error: String(error).slice(0, 200),
+      });
+      return { ok: false, queued: false };
+    }
+  }
+
+  // 3. Queue for manual / offline review
+  await record({ ...opts, recipient: opts.to, channel: "email", status: "queued" });
+  return { ok: false, queued: true };
 }
 
 /**

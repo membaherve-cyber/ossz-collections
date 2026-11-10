@@ -1,6 +1,6 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { db } from "@/db";
 import {
@@ -14,6 +14,7 @@ import {
   journalPosts,
   lookbookItems,
   media,
+  notifications,
   productImages,
   productVariants,
   products,
@@ -260,10 +261,11 @@ export async function deleteHomeBlockAction(formData: FormData) {
 
 export async function saveLookAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
   await requireRole("catalogue");
+  const id = formData.get("id") ? Number(formData.get("id")) : null;
   const imageUrl = String(formData.get("imageUrl") ?? "").trim();
   if (!imageUrl) return { ok: false, message: "A photo or video is required." };
   const mediaType = String(formData.get("mediaType") ?? "image") === "video" ? "video" : "image";
-  await db.insert(lookbookItems).values({
+  const values = {
     title: String(formData.get("title") ?? ""),
     caption: String(formData.get("caption") ?? ""),
     imageUrl,
@@ -273,10 +275,16 @@ export async function saveLookAction(_prev: ActionState, formData: FormData): Pr
     durationSeconds: mediaType === "video" ? Number(formData.get("durationSeconds")) || null : null,
     productSlug: String(formData.get("productSlug") ?? ""),
     sortOrder: Number(formData.get("sortOrder") ?? 0),
-  });
+  };
+
+  if (id) {
+    await db.update(lookbookItems).set(values).where(eq(lookbookItems.id, id));
+  } else {
+    await db.insert(lookbookItems).values(values);
+  }
   revalidatePath("/admin/lookbook");
   revalidatePath("/lookbook");
-  return { ok: true, message: mediaType === "video" ? "Video added to the lookbook." : "Look added to the lookbook." };
+  return { ok: true, message: mediaType === "video" ? "Video saved to the lookbook." : "Look saved to the lookbook." };
 }
 
 export async function deleteLookAction(formData: FormData) {
@@ -430,11 +438,34 @@ export async function saveFaqAction(_prev: ActionState, formData: FormData): Pro
 
 export async function saveStaffAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const user = await requireRole("admin");
+  const id = formData.get("id") ? Number(formData.get("id")) : null;
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const role = String(formData.get("role") ?? "staff");
   const fullName = String(formData.get("fullName") ?? "");
   const password = String(formData.get("password") ?? "");
   if (!email) return { ok: false, message: "An email is required." };
+
+  if (id) {
+    const target = (await db.select().from(users).where(eq(users.id, id)).limit(1))[0];
+    if (!target) return { ok: false, message: "Staff member not found." };
+
+    const conflict = (await db.select().from(users).where(and(eq(users.email, email), ne(users.id, id))).limit(1))[0];
+    if (conflict) return { ok: false, message: "That email is already in use by another account." };
+
+    const updates: Record<string, unknown> = {
+      email,
+      role,
+      fullName: fullName || target.fullName,
+      updatedAt: new Date(),
+    };
+    if (password.trim().length >= 6) {
+      updates.passwordHash = hashPassword(password.trim());
+    }
+    await db.update(users).set(updates).where(eq(users.id, id));
+    await log(user.id, user.email, "staff.update", `${email} (id: ${id}) → ${role}`);
+    revalidatePath("/admin/staff");
+    return { ok: true, message: `Staff account updated for ${email}.` };
+  }
 
   const existing = (await db.select().from(users).where(eq(users.email, email)).limit(1))[0];
   if (existing) {
@@ -446,4 +477,15 @@ export async function saveStaffAction(_prev: ActionState, formData: FormData): P
   await log(user.id, user.email, "staff.save", `${email} → ${role}`);
   revalidatePath("/admin/staff");
   return { ok: true, message: `${email} is now a ${role}.` };
+}
+
+/* -------------------------- Notifications ---------------------------- */
+
+export async function deleteNotificationAction(formData: FormData) {
+  const user = await requireRole("admin");
+  const id = Number(formData.get("id"));
+  if (!id) return;
+  await db.delete(notifications).where(eq(notifications.id, id));
+  await log(user.id, user.email, "notifications.delete", `Notification #${id} deleted`);
+  revalidatePath("/admin/notifications");
 }

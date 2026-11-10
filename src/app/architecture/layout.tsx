@@ -1,29 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { Playfair_Display, Inter, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
-
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-playfair",
-  display: "swap",
-});
-
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-inter",
-  display: "swap",
-});
-
-const cormorant = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"],
-  variable: "--font-cormorant",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: {
@@ -40,7 +17,7 @@ export default function ArchitectureLayout({
   children: ReactNode;
 }) {
   return (
-    <div className={`min-h-screen ${playfair.variable} ${inter.variable} ${cormorant.variable}`}>
+    <div className="min-h-screen font-sans">
       {children}
     </div>
   );
